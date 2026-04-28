@@ -23,4 +23,4 @@ Aplikasi ini memanfaatkan teknologi mutakhir untuk memastikan reliabilitas:
 * **Modern Bundling** untuk hasil produksi yang ringan dan cepat.
 
 ---
-Developed with a focus on quality and performance by **Ipang Yuwono**.
+Developed with a focus on quality and performance by **Team FE Mantis**.
