@@ -1,87 +1,26 @@
-# Welcome to React Router!
+# 🦾 Mantis Frontend
 
-A modern, production-ready template for building full-stack React applications using React Router.
+### *Elevating Web Interfaces with Precision and Speed.*
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
-
-## Features
-
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
-
-## Getting Started
-
-### Installation
-
-Install the dependencies:
-
-```bash
-pnpm install
-```
-
-### Development
-
-Start the development server with HMR:
-
-```bash
-pnpm dev
-```
-
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
-pnpm build
-```
-
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `pnpm build`
-
-```
-├── package.json
-├── pnpm-lock.yaml
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+Mantis Frontend adalah sebuah platform web modern yang dirancang untuk memberikan pengalaman pengguna yang imersif dan responsif. Menggunakan arsitektur **Full-stack React**, project ini berfokus pada performa tinggi, transisi antar halaman yang mulus, dan integrasi data yang efisien.
 
 ---
 
-Built with ❤️ using React Router.
+## 💎 The Vision
+Project ini dibangun dengan standar estetika tinggi, menggabungkan desain UI/UX yang *clean* dengan fungsionalitas yang kuat. Mantis bukan sekadar template, melainkan sebuah pondasi aplikasi web yang siap menangani logika bisnis kompleks dengan tampilan kelas dunia.
+
+## ✨ Key Highlights
+* **Immersive Experience:** Navigasi super cepat berkat optimasi *routing* tingkat lanjut.
+* **Modern Aesthetics:** Tampilan yang presisi menggunakan sistem desain berbasis utilitas.
+* **Robust Architecture:** Struktur kode yang modular, memudahkan skalabilitas dan perawatan jangka panjang.
+* **Production Ready:** Dioptimasi sepenuhnya untuk keamanan, kecepatan akses, dan SEO.
+
+## 🏗️ Tech Stack
+Aplikasi ini memanfaatkan teknologi mutakhir untuk memastikan reliabilitas:
+* **React Router** sebagai mesin utama pengelola data dan navigasi.
+* **TypeScript** untuk memastikan keamanan tipe data dan meminimalisir error.
+* **Tailwind CSS** untuk kontrol desain yang presisi dan responsif.
+* **Modern Bundling** untuk hasil produksi yang ringan dan cepat.
+
+---
+Developed with a focus on quality and performance by **Ipang Yuwono**.
