@@ -9,6 +9,7 @@ import {
 
 import "./app.css";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Layout";
 
 export const links = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -46,6 +47,7 @@ export default function App() {
     <>
       <Navbar />
       <Outlet />
+      <Footer />
     </>
   );
 }
