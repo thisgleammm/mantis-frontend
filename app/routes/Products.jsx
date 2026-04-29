@@ -8,16 +8,25 @@ export default function Products() {
     const [search, setSearch] = useState("")
 
     useEffect(() => {
-        getAllProducts()
-            .then(data => {
-                setProducts(data)
-                setLoading(false)
-            })
-            .catch(err => {
-                console.error(err)
-                setLoading(false)
-            })
+        const fetchProducts = () => {
+            getAllProducts()
+                .then(data => {
+                    setProducts(data)
+                    setLoading(false)
+                })
+                .catch(err => {
+                    console.error(err)
+                    setLoading(false)
+                })
+        }
+
+        fetchProducts()
+
+        const interval = setInterval(fetchProducts, 5000)
+
+        return () => clearInterval(interval)
     }, [])
+
 
     const filtered = products.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase())
