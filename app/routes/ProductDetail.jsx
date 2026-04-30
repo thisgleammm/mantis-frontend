@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router"
 import { useState, useEffect } from "react"
 import { getProductById } from "../services/productService"
+import { ProductDetailSkeleton } from "../components/Skeleton"
 
 export default function ProductDetail() {
     const { id } = useParams()
@@ -20,10 +21,10 @@ export default function ProductDetail() {
     }, [id])
 
     if (loading) return (
-        <div className="min-h-screen bg-black flex items-center justify-center text-white">
-            <p className="text-gray-400">Loading...</p>
+        <div className="min-h-screen bg-black text-white px-6 py-10 font-sans">
+            <ProductDetailSkeleton />
         </div>
-    )
+    )   
 
     if (!product) return (
         <div className="min-h-screen bg-black flex items-center justify-center text-white">
