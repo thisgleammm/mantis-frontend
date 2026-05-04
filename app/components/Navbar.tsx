@@ -1,31 +1,34 @@
-import { Link, useNavigate } from "react-router"
+import { Link, useNavigate, useLocation } from "react-router"
 import { useState, useEffect } from "react"
 import { logout } from "../services/authService"
 
 export default function Navbar() {
   const navigate = useNavigate()
-  const [token, setToken] = useState<string | null>(null)
+  const location = useLocation()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    // Note: With HttpOnly cookies, we should ideally fetch /me here.
-    // For now, we'll check if we have a session flag or just keep it null.
-    // setToken(localStorage.getItem("token"))
+    // Update login state whenever the location changes
+    const authStatus = localStorage.getItem("is_logged_in") === "true"
+    setIsLoggedIn(authStatus)
 
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [location])
 
   const handleLogout = async () => {
     try {
       await logout()
-      setToken(null)
+      localStorage.removeItem("is_logged_in")
+      setIsLoggedIn(false)
       navigate("/login")
     } catch (err) {
       console.error("Logout failed:", err)
     }
   }
+
 
   return (
     <nav className={`w-full sticky top-0 z-50 px-6 py-4 flex items-center justify-between transition-all duration-300 ${
@@ -44,7 +47,7 @@ export default function Navbar() {
       <div className="flex items-center gap-8 text-sm">
         <Link to="/" className="text-gray-400 hover:text-white transition">Home</Link>
         <Link to="/products" className="text-gray-400 hover:text-white transition">Products</Link>
-        {token && (
+        {isLoggedIn && (
           <Link to="/cart" className="text-gray-400 hover:text-white transition relative">
             Cart
             <span className="absolute -top-1 -right-3 w-2 h-2 bg-purple-500 rounded-full" />
@@ -53,8 +56,9 @@ export default function Navbar() {
       </div>
         
       <div className="flex items-center gap-3">
-        {token ? (
+        {isLoggedIn ? (
           <>
+
             <Link to="/orders">
               <button className="px-4 py-2 text-sm text-gray-300 border border-white/10 rounded-xl hover:border-purple-500/30 hover:text-white transition">
                 Orders

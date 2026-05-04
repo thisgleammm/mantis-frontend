@@ -32,8 +32,10 @@ export default function Login() {
             const data = await login(form.email, form.password)
 
             if (data.message === "logged in successfully") {
+                localStorage.setItem("is_logged_in", "true")
                 navigate("/")
             } else {
+
                 // API returned an error message (e.g. invalid credentials)
                 setError(data.message || "Email atau password yang Anda masukkan tidak terdaftar.");
             }
