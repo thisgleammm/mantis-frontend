@@ -24,7 +24,7 @@ export const links = () => [
   },
 ];
 
-export function Layout({ children }) {
+export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -52,7 +52,8 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary({ error }) {
+export function ErrorBoundary({ error }: { error: unknown }) {
+
   let message = "Oops!";
   let details = "An unexpected error occurred.";
   let stack;

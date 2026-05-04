@@ -1,6 +1,7 @@
 import { Link } from "react-router"
 import { useState, useEffect } from "react"
 import { getAllProducts } from "../services/productService"
+import type { Product } from "../types"
 
 const categories = [
   { name: "Smartphone", icon: "📱" },
@@ -10,7 +11,8 @@ const categories = [
 ]
 
 export default function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState([])
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+
 
   useEffect(() => {
     getAllProducts()

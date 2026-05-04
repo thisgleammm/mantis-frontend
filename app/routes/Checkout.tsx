@@ -1,7 +1,14 @@
-import { useState } from "react"
+import { useState, type ChangeEvent } from "react"
 import { useNavigate } from "react-router"
 
-const dummyCart = [
+interface CartItem {
+  id: number;
+  name: string;
+  base_price: number;
+  quantity: number;
+}
+
+const dummyCart: CartItem[] = [
   { id: 1, name: "Airpods Pro", base_price: 2500000, quantity: 1 },
   { id: 2, name: "Macbook Pro M5", base_price: 35000000, quantity: 1 },
 ]
@@ -14,7 +21,8 @@ export default function Checkout() {
   })
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm({ ...form, [e.target.name]: e.target.value })
+
 
   const subtotal = dummyCart.reduce((acc, item) => acc + item.base_price * item.quantity, 0)
   const shipping = 50000

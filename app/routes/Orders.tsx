@@ -2,7 +2,25 @@ import { Link } from "react-router"
 import { useState } from "react"
 import { OrderCardSkeleton } from "../components/Skeleton"
 
-const dummyOrders = [
+interface OrderItem {
+  id: number;
+  product_name: string;
+  quantity: number;
+  price_at_purchase: number;
+}
+
+interface Order {
+  id: number;
+  invoice_number: string;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  grand_total: number;
+  courier_name: string | null;
+  tracking_number: string | null;
+  created_at: string;
+  items: OrderItem[];
+}
+
+const dummyOrders: Order[] = [
   {
     id: 1,
     invoice_number: "INV-20260001",
@@ -30,13 +48,14 @@ const dummyOrders = [
   },
 ]
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; color: string }> = {
   pending:    { label: "Pending",    color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" },
   processing: { label: "Processing", color: "text-blue-400 bg-blue-400/10 border-blue-400/20" },
   shipped:    { label: "Shipped",    color: "text-purple-400 bg-purple-400/10 border-purple-400/20" },
   delivered:  { label: "Delivered",  color: "text-green-400 bg-green-400/10 border-green-400/20" },
   cancelled:  { label: "Cancelled",  color: "text-red-400 bg-red-400/10 border-red-400/20" },
 }
+
 
 export default function Orders() {
   const [loading] = useState(false)

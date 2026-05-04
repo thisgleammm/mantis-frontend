@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type ChangeEvent } from "react"
 import { Link, useNavigate } from "react-router"
 import { register } from "../services/authService"
 
@@ -10,9 +10,10 @@ export default function Register() {
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
 
-    const handleChange = (e) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
+
 
     const handleRegister = async () => {
         setLoading(true)

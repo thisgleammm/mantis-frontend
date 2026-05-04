@@ -1,15 +1,21 @@
 import { Link } from "react-router"
 import { useState } from "react"
+import type { Product } from "../types"
 
-const dummyCart = [
-  { id: 1, name: "Airpods Pro", base_price: 2500000, category: "Audio", quantity: 1 },
-  { id: 2, name: "Macbook Pro M5", base_price: 35000000, category: "Laptop", quantity: 1 },
+interface CartItem extends Product {
+  quantity: number;
+}
+
+const dummyCart: CartItem[] = [
+  { id: 1, name: "Airpods Pro", base_price: 2500000, category: "Audio", quantity: 1, category_id: 1, slug: "airpods-pro", rating_average: 0, rating_count: 0, created_at: "" },
+  { id: 2, name: "Macbook Pro M5", base_price: 35000000, category: "Laptop", quantity: 1, category_id: 2, slug: "macbook-pro-m5", rating_average: 0, rating_count: 0, created_at: "" },
 ]
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState(dummyCart)
+  const [cartItems, setCartItems] = useState<CartItem[]>(dummyCart)
 
-  const updateQty = (id, delta) => {
+  const updateQty = (id: number | string, delta: number) => {
+
     setCartItems(prev =>
       prev.map(item =>
         item.id === id
@@ -19,7 +25,7 @@ export default function Cart() {
     )
   }
 
-  const removeItem = (id) => {
+  const removeItem = (id: number | string) => {
     setCartItems(prev => prev.filter(item => item.id !== id))
   }
 

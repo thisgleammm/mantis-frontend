@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 
 export default function Navbar() {
   const navigate = useNavigate()
-  const [token, setToken] = useState(null)
+  const [token, setToken] = useState<string | null>(null)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {

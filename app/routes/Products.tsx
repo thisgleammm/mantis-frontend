@@ -2,9 +2,11 @@ import { Link } from "react-router"
 import { useState, useEffect } from "react"
 import { getAllProducts } from "../services/productService"
 import { ProductCardSkeleton } from "../components/Skeleton"
+import type { Product } from "../types"
 
 export default function Products() {
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState<Product[]>([])
+
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
 

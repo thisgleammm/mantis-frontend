@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type ChangeEvent } from "react"
 import { Link, useNavigate } from "react-router"
 import { login } from "../services/authService"
 
@@ -8,9 +8,10 @@ export default function Login() {
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
 
-    const handleChange = (e) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
+
 
     const handleLogin = async () => {
         setLoading(true)

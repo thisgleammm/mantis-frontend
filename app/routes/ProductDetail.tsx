@@ -2,10 +2,12 @@ import { useParams, Link } from "react-router"
 import { useState, useEffect } from "react"
 import { getProductById } from "../services/productService"
 import { ProductDetailSkeleton } from "../components/Skeleton"
+import type { Product } from "../types"
 
 export default function ProductDetail() {
     const { id } = useParams()
-    const [product, setProduct] = useState(null)
+    const [product, setProduct] = useState<Product | null>(null)
+
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
