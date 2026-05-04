@@ -1,41 +1,35 @@
-import { useState, type ChangeEvent } from "react"
-import { Link, useNavigate } from "react-router"
-import { register } from "../services/authService"
+import { Link, Form, redirect, useNavigation, useActionData } from "react-router";
+import { register } from "../services/authService";
+
+export async function clientAction({ request }: { request: Request }) {
+    const formData = await request.formData();
+    const username = formData.get("username") as string;
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const phone_number = formData.get("phone_number") as string;
+    const password = formData.get("password") as string;
+
+    if (!username || !name || !email || !phone_number || !password) {
+        return { error: "Semua field harus diisi" };
+    }
+
+    try {
+        const data = await register(username, name, email, password, phone_number);
+
+        if (data.id || data.token || data.message === "success") {
+            return redirect("/login");
+        } else {
+            return { error: data.message || data.error || "Pendaftaran gagal. Pastikan data yang Anda masukkan benar." };
+        }
+    } catch (err) {
+        return { error: "Gagal terhubung ke server. Pastikan koneksi internet Anda stabil." };
+    }
+}
 
 export default function Register() {
-    const navigate = useNavigate()
-    const [form, setForm] = useState({
-        username: "", name: "", email: "", password: "", phone_number: ""
-    })
-    const [error, setError] = useState("")
-    const [loading, setLoading] = useState(false)
-
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setForm({ ...form, [e.target.name]: e.target.value })
-        if (error) setError("")
-    }
-
-
-
-    const handleRegister = async () => {
-        setLoading(true)
-        setError("")
-        try {
-            const data = await register(
-                form.username, form.name, form.email, form.password, form.phone_number
-            )
-
-            if (data.id || data.token || data.message === "success") {
-                navigate("/login")
-            } else {
-                setError(data.message || data.error || "Pendaftaran gagal. Pastikan data yang Anda masukkan benar.");
-            }
-        } catch (err) {
-            setError("Gagal terhubung ke server. Pastikan koneksi internet Anda stabil.");
-        }
-
-        setLoading(false)
-    }
+    const actionData = useActionData<typeof clientAction>();
+    const navigation = useNavigation();
+    const loading = navigation.state === "submitting";
 
     return (
         <div className="min-h-screen bg-black text-white flex items-center justify-center px-6">
@@ -50,23 +44,22 @@ export default function Register() {
                 {/* Card */}
                 <div className="bg-white/4 border border-white/8 rounded-2xl p-8 backdrop-blur">
 
-                    {error && (
+                    {actionData?.error && (
                         <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-6 flex items-center gap-2 animate-shake">
                             <span className="text-base">⚠️</span>
-                            {error}
+                            {actionData.error}
                         </div>
                     )}
 
 
-                    <div className="flex flex-col gap-4">
+                    <Form method="post" className="flex flex-col gap-4">
                         <div>
                             <label className="text-xs text-gray-400 mb-1 block">Username</label>
                             <input
                                 type="text"
                                 name="username"
                                 placeholder="username"
-                                value={form.username}
-                                onChange={handleChange}
+                                required
                                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-white/30 transition"
                             />
                         </div>
@@ -77,8 +70,7 @@ export default function Register() {
                                 type="text"
                                 name="name"
                                 placeholder="John Doe"
-                                value={form.name}
-                                onChange={handleChange}
+                                required
                                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-white/30 transition"
                             />
                         </div>
@@ -89,8 +81,7 @@ export default function Register() {
                                 type="email"
                                 name="email"
                                 placeholder="email@example.com"
-                                value={form.email}
-                                onChange={handleChange}
+                                required
                                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-white/30 transition"
                             />
                         </div>
@@ -101,8 +92,7 @@ export default function Register() {
                                 type="text"
                                 name="phone_number"
                                 placeholder="08xxxxxxxxxx"
-                                value={form.phone_number}
-                                onChange={handleChange}
+                                required
                                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-white/30 transition"
                             />
                         </div>
@@ -113,20 +103,19 @@ export default function Register() {
                                 type="password"
                                 name="password"
                                 placeholder="••••••••"
-                                value={form.password}
-                                onChange={handleChange}
+                                required
                                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-white/30 transition"
                             />
                         </div>
 
                         <button
-                            onClick={handleRegister}
+                            type="submit"
                             disabled={loading}
                             className="w-full py-3 bg-white text-black font-semibold rounded-xl hover:bg-gray-200 transition text-sm mt-2 disabled:opacity-50"
                         >
                             {loading ? "Loading..." : "Register"}
                         </button>
-                    </div>
+                    </Form>
 
                     <p className="text-center text-gray-500 text-sm mt-6">
                         Udah punya akun?{" "}
@@ -137,5 +126,5 @@ export default function Register() {
                 </div>
             </div>
         </div>
-    )
+    );
 }

@@ -1,6 +1,6 @@
 import type { Product } from "../types";
 
-const BASE_URL = "https://mantis-backend.fly.dev/api/v1";
+const BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
 
 export const getAllProducts = async (): Promise<Product[]> => {
   const response = await fetch(`${BASE_URL}/products`);
