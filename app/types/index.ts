@@ -6,13 +6,16 @@ export interface Product {
   description?: string;
   base_price: number;
   discount_price?: number;
+  weight?: number;
+  specifications?: Record<string, any>;
   rating_average: number;
   rating_count: number;
   created_at: string;
   variants?: Variant[];
   reviews?: Review[];
-  category?: string; // Kept for backward compatibility if used in UI
+  category?: string;
 }
+
 
 
 export interface Variant {

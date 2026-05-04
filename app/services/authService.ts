@@ -38,7 +38,7 @@ export const register = async (
 };
 
 export const getCurrentUser = async (): Promise<any> => {
-  const response = await fetch(`${BASE_URL}/auth/me`, {
+  const response = await fetch(`${BASE_URL}/users/me`, {
     method: "GET",
     credentials: "include",
   });
