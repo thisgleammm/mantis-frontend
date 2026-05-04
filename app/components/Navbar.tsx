@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router"
 import { useState, useEffect } from "react"
+import { logout } from "../services/authService"
 
 export default function Navbar() {
   const navigate = useNavigate()
@@ -7,17 +8,23 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    setToken(localStorage.getItem("token"))
+    // Note: With HttpOnly cookies, we should ideally fetch /me here.
+    // For now, we'll check if we have a session flag or just keep it null.
+    // setToken(localStorage.getItem("token"))
 
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem("token")
-    setToken(null)
-    navigate("/login")
+  const handleLogout = async () => {
+    try {
+      await logout()
+      setToken(null)
+      navigate("/login")
+    } catch (err) {
+      console.error("Logout failed:", err)
+    }
   }
 
   return (

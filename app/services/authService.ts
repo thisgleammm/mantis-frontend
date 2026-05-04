@@ -5,6 +5,16 @@ export const login = async (email: string, password: string): Promise<any> => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
+    credentials: "include",
+  });
+  const data = await response.json();
+  return data;
+};
+
+export const logout = async (): Promise<any> => {
+  const response = await fetch(`${BASE_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
   });
   const data = await response.json();
   return data;
@@ -21,6 +31,7 @@ export const register = async (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, name, email, password, phone_number }),
+    credentials: "include",
   });
   const data = await response.json();
   return data;

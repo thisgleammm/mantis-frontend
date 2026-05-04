@@ -31,8 +31,7 @@ export default function Login() {
         try {
             const data = await login(form.email, form.password)
 
-            if (data.token) {
-                localStorage.setItem("token", data.token)
+            if (data.message === "logged in successfully") {
                 navigate("/")
             } else {
                 // API returned an error message (e.g. invalid credentials)
