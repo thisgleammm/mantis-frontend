@@ -10,12 +10,19 @@ export default function Login() {
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value })
+        if (error) setError("")
     }
+
 
 
     const handleLogin = async () => {
         if (form.password.length < 8) {
             setError("Password minimal 8 karakter");
+            return;
+        }
+
+        if (!form.email || !form.password) {
+            setError("Semua field harus diisi");
             return;
         }
 
@@ -28,11 +35,14 @@ export default function Login() {
                 localStorage.setItem("token", data.token)
                 navigate("/")
             } else {
-                setError(data.message || "Login gagal")
+                // API returned an error message (e.g. invalid credentials)
+                setError(data.message || "Email atau password yang Anda masukkan tidak terdaftar.");
             }
         } catch (err) {
-            setError("Terjadi kesalahan, coba lagi")
+            // Likely a network error or server is down
+            setError("Gagal terhubung ke server. Pastikan koneksi internet Anda stabil.");
         }
+
         setLoading(false)
     }
 
@@ -48,10 +58,12 @@ export default function Login() {
                 <div className="bg-white/4 border border-white/8 rounded-2xl p-8 backdrop-blur">
 
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-6">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-6 flex items-center gap-2 animate-shake">
+                            <span className="text-base">⚠️</span>
                             {error}
                         </div>
                     )}
+
 
                     <div className="flex flex-col gap-4">
                         <div>
