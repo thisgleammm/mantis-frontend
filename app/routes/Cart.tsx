@@ -1,17 +1,6 @@
-import { Link, redirect } from "react-router"
-import { useState } from "react"
+import { Link, useNavigate } from "react-router"
+import { useState, useEffect } from "react"
 import type { Product } from "../types"
-
-export const loader = async () => {
-  const authStatus = typeof window !== "undefined" 
-    ? localStorage.getItem("is_logged_in") === "true"
-    : false;
-    
-  if (!authStatus) {
-    return redirect("/login");
-  }
-  return null;
-};
 
 interface CartItem extends Product {
   quantity: number;
@@ -23,10 +12,17 @@ const dummyCart: CartItem[] = [
 ]
 
 export default function Cart() {
+  const navigate = useNavigate()
   const [cartItems, setCartItems] = useState<CartItem[]>(dummyCart)
 
-  const updateQty = (id: number | string, delta: number) => {
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("is_logged_in") === "true"
+    if (!isLoggedIn) {
+      navigate("/login")
+    }
+  }, [])
 
+  const updateQty = (id: number | string, delta: number) => {
     setCartItems(prev =>
       prev.map(item =>
         item.id === id
