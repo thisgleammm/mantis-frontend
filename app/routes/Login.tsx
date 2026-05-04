@@ -14,6 +14,11 @@ export default function Login() {
 
 
     const handleLogin = async () => {
+        if (form.password.length < 8) {
+            setError("Password minimal 8 karakter");
+            return;
+        }
+
         setLoading(true)
         setError("")
         try {
@@ -30,6 +35,7 @@ export default function Login() {
         }
         setLoading(false)
     }
+
 
     return (
         <div className="min-h-screen bg-black text-white flex ixtems-center justify-center px-6">
@@ -66,10 +72,12 @@ export default function Login() {
                                 type="password"
                                 name="password"
                                 placeholder="••••••••"
+                                minLength={8}
                                 value={form.password}
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-white/30 transition"
                             />
+
                         </div>
 
                         <button
