@@ -7,4 +7,12 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://mantis-backend.fly.dev",
+        changeOrigin: true,
+      },
+    },
+  },
 });
