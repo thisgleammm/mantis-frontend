@@ -12,7 +12,9 @@ export default function Register() {
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value })
+        if (error) setError("")
     }
+
 
 
     const handleRegister = async () => {
@@ -26,11 +28,12 @@ export default function Register() {
             if (data.id || data.token || data.message === "success") {
                 navigate("/login")
             } else {
-                setError(data.message || data.error || "Register gagal")
+                setError(data.message || data.error || "Pendaftaran gagal. Pastikan data yang Anda masukkan benar.");
             }
         } catch (err) {
-            setError("Terjadi kesalahan, coba lagi")
+            setError("Gagal terhubung ke server. Pastikan koneksi internet Anda stabil.");
         }
+
         setLoading(false)
     }
 
@@ -48,10 +51,12 @@ export default function Register() {
                 <div className="bg-white/4 border border-white/8 rounded-2xl p-8 backdrop-blur">
 
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-6">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-6 flex items-center gap-2 animate-shake">
+                            <span className="text-base">⚠️</span>
                             {error}
                         </div>
                     )}
+
 
                     <div className="flex flex-col gap-4">
                         <div>
