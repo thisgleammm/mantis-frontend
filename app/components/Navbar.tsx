@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router"
 import { useState, useEffect } from "react"
-import { logout } from "../services/authService"
+import { logout, getCurrentUser } from "../services/authService"
 
 export default function Navbar() {
   const navigate = useNavigate()
@@ -9,11 +9,22 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    // Update login state whenever the location changes
+    // Initial UI state from localStorage
     const authStatus = localStorage.getItem("is_logged_in") === "true"
     setIsLoggedIn(authStatus)
 
+    // Verify session with backend on mount
+    if (authStatus) {
+      getCurrentUser()
+        .catch(() => {
+          // If backend says unauthorized, clear local flag
+          localStorage.removeItem("is_logged_in")
+          setIsLoggedIn(false)
+        })
+    }
+
     const handleScroll = () => setScrolled(window.scrollY > 20)
+
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [location])

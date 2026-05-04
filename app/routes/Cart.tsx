@@ -1,6 +1,17 @@
-import { Link } from "react-router"
+import { Link, redirect } from "react-router"
 import { useState } from "react"
 import type { Product } from "../types"
+
+export const loader = async () => {
+  const authStatus = typeof window !== "undefined" 
+    ? localStorage.getItem("is_logged_in") === "true"
+    : false;
+    
+  if (!authStatus) {
+    return redirect("/login");
+  }
+  return null;
+};
 
 interface CartItem extends Product {
   quantity: number;

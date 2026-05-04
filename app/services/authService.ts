@@ -36,3 +36,12 @@ export const register = async (
   const data = await response.json();
   return data;
 };
+
+export const getCurrentUser = async (): Promise<any> => {
+  const response = await fetch(`${BASE_URL}/auth/me`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) throw new Error("Unauthorized");
+  return response.json();
+};

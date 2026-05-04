@@ -1,5 +1,17 @@
 import { useState, type ChangeEvent } from "react"
-import { useNavigate } from "react-router"
+import { useNavigate, redirect } from "react-router"
+
+export const loader = async () => {
+  const authStatus = typeof window !== "undefined" 
+    ? localStorage.getItem("is_logged_in") === "true"
+    : false;
+    
+  if (!authStatus) {
+    return redirect("/login");
+  }
+  return null;
+};
+
 
 interface CartItem {
   id: number;
