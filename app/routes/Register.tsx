@@ -1,4 +1,4 @@
-import { Link, Form, redirect, useNavigation, useActionData } from "react-router";
+import { Link, Form, redirect, useNavigation, useActionData, useSearchParams } from "react-router";
 import { register } from "../services/authService";
 import { useState, useEffect } from "react";
 
@@ -43,6 +43,8 @@ function useTheme() {
 export default function Register() {
     const actionData = useActionData<typeof clientAction>();
     const navigation = useNavigation();
+    const [searchParams] = useSearchParams();
+    const emailParam = searchParams.get("email") || "";
     const loading = navigation.state === "submitting";
     const isDark = useTheme()
     const d = isDark
@@ -101,6 +103,7 @@ export default function Register() {
                             <input
                                 type="email"
                                 name="email"
+                                defaultValue={emailParam}
                                 placeholder="email@example.com"
                                 required
                                 className={inputClass}
