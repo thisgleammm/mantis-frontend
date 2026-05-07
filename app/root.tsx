@@ -7,13 +7,13 @@ import {
   ScrollRestoration,
 } from "react-router";
 
-import "./app.css";
+import "./global.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Layout";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -28,7 +28,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           __html: `
             (function() {
               const theme = localStorage.getItem('theme') || 'dark';
+              document.documentElement.classList.remove('dark', 'light');
               document.documentElement.classList.add(theme);
+              document.documentElement.setAttribute('data-theme', theme);
             })();
           `
         }} />

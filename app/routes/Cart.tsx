@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router"
 import { useState, useEffect } from "react"
 import type { Product } from "../types"
+import { useTheme } from "../hooks/useTheme"
 
 interface CartItem extends Product {
   quantity: number;
@@ -11,23 +12,10 @@ const dummyCart: CartItem[] = [
   { id: 2, name: "Macbook Pro M5", base_price: 35000000, category: "Laptop", quantity: 1, category_id: 2, slug: "macbook-pro-m5", rating_average: 0, rating_count: 0, created_at: "" },
 ]
 
-function useTheme() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === "undefined") return true
-    return (localStorage.getItem("theme") || "dark") === "dark"
-  })
-  useEffect(() => {
-    const handler = () => setIsDark((localStorage.getItem("theme") || "dark") === "dark")
-    window.addEventListener("themechange", handler)
-    return () => window.removeEventListener("themechange", handler)
-  }, [])
-  return isDark
-}
 
 export default function Cart() {
   const navigate = useNavigate()
-  const isDark = useTheme()
-  const d = isDark
+  useTheme()
   const [cartItems, setCartItems] = useState<CartItem[]>(dummyCart)
 
   useEffect(() => {
@@ -56,13 +44,13 @@ export default function Cart() {
   const total = subtotal + shipping
 
   return (
-    <div className={`min-h-screen px-6 py-10 font-sans transition-colors duration-300 ${d ? "bg-black text-white" : "bg-gray-50 text-black"}`}>
+    <div className="min-h-screen px-6 py-10 font-sans bg-gray-50 text-black dark:bg-black dark:text-white">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className={`text-3xl font-bold tracking-tight ${d ? "text-white" : "text-black"}`}>Your Cart</h1>
-          <p className={`text-sm mt-1 ${d ? "text-gray-500" : "text-gray-400"}`}>
+          <h1 className="text-3xl font-bold tracking-tight text-black dark:text-white">Your Cart</h1>
+          <p className="text-sm mt-1 text-gray-400 dark:text-gray-500">
             <span className="text-purple-400">{cartItems.length}</span> items in your cart
           </p>
         </div>
@@ -72,10 +60,10 @@ export default function Cart() {
             <div className="w-20 h-20 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-4xl mb-6">
               🛒
             </div>
-            <h2 className={`text-xl font-semibold mb-2 ${d ? "text-white" : "text-black"}`}>Cart kosong nih!</h2>
-            <p className={`text-sm mb-6 ${d ? "text-gray-500" : "text-gray-400"}`}>Yuk belanja dulu</p>
+            <h2 className="text-xl font-semibold mb-2 text-black dark:text-white">Cart kosong nih!</h2>
+            <p className="text-sm mb-6 text-gray-400 dark:text-gray-500">Yuk belanja dulu</p>
             <Link to="/products">
-              <button className={`px-6 py-3 font-semibold rounded-xl transition text-sm ${d ? "bg-white text-black hover:bg-gray-100" : "bg-black text-white hover:bg-zinc-800"}`}>
+              <button className="px-6 py-3 font-semibold rounded-xl transition text-sm bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-gray-100">
                 Shop Now
               </button>
             </Link>
@@ -88,12 +76,10 @@ export default function Cart() {
               {cartItems.map(item => (
                 <div
                   key={item.id}
-                  className={`group border rounded-2xl p-4 flex gap-4 items-center hover:border-purple-500/20 hover:shadow-md hover:shadow-purple-500/5 transition-all duration-200 ${
-                    d ? "bg-white/4 border-white/8" : "bg-white border-black/8"
-                  }`}
+                  className="group border rounded-2xl p-4 flex gap-4 items-center hover:border-purple-500/20 hover:shadow-md hover:shadow-purple-500/5 transition-all duration-200 bg-white border-black/8 dark:bg-white/4 dark:border-white/8"
                 >
                   {/* Image */}
-                  <div className={`w-20 h-20 rounded-xl border flex items-center justify-center text-3xl flex-shrink-0 ${d ? "bg-gradient-to-br from-zinc-900 to-zinc-800 border-white/5" : "bg-gradient-to-br from-gray-100 to-gray-200 border-black/5"}`}>
+                  <div className="w-20 h-20 rounded-xl border flex items-center justify-center text-3xl flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 border-black/5 dark:from-zinc-900 dark:to-zinc-800 dark:border-white/5">
                     🛍️
                   </div>
 
@@ -102,10 +88,10 @@ export default function Cart() {
                     <span className="text-xs text-purple-400/70 bg-purple-500/10 border border-purple-500/20 px-2 py-1 rounded-full">
                       {item.category}
                     </span>
-                    <h3 className={`text-sm font-semibold mt-2 transition ${d ? "text-white group-hover:text-purple-100" : "text-black group-hover:text-purple-700"}`}>
+                    <h3 className="text-sm font-semibold mt-2 transition text-black group-hover:text-purple-700 dark:text-white dark:group-hover:text-purple-100">
                       {item.name}
                     </h3>
-                    <p className={`text-base font-bold mt-1 ${d ? "text-white" : "text-black"}`}>
+                    <p className="text-base font-bold mt-1 text-black dark:text-white">
                       Rp {(item.base_price * item.quantity).toLocaleString("id-ID")}
                     </p>
                   </div>
@@ -114,22 +100,14 @@ export default function Cart() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => updateQty(item.id, -1)}
-                      className={`w-8 h-8 rounded-lg border flex items-center justify-center text-lg transition ${
-                        d
-                          ? "border-white/10 text-white hover:border-purple-500/40 hover:text-purple-300"
-                          : "border-black/10 text-black hover:border-purple-500/40 hover:text-purple-600"
-                      }`}
+                      className="w-8 h-8 rounded-lg border flex items-center justify-center text-lg transition border-black/10 text-black hover:border-purple-500/40 hover:text-purple-600 dark:border-white/10 dark:text-white dark:hover:border-purple-500/40 dark:hover:text-purple-300"
                     >
                       −
                     </button>
-                    <span className={`text-sm font-semibold w-6 text-center ${d ? "text-white" : "text-black"}`}>{item.quantity}</span>
+                    <span className="text-sm font-semibold w-6 text-center text-black dark:text-white">{item.quantity}</span>
                     <button
                       onClick={() => updateQty(item.id, 1)}
-                      className={`w-8 h-8 rounded-lg border flex items-center justify-center text-lg transition ${
-                        d
-                          ? "border-white/10 text-white hover:border-purple-500/40 hover:text-purple-300"
-                          : "border-black/10 text-black hover:border-purple-500/40 hover:text-purple-600"
-                      }`}
+                      className="w-8 h-8 rounded-lg border flex items-center justify-center text-lg transition border-black/10 text-black hover:border-purple-500/40 hover:text-purple-600 dark:border-white/10 dark:text-white dark:hover:border-purple-500/40 dark:hover:text-purple-300"
                     >
                       +
                     </button>
@@ -148,31 +126,31 @@ export default function Cart() {
 
             {/* Summary */}
             <div className="w-full lg:w-80 flex-shrink-0">
-              <div className={`border border-purple-500/15 rounded-2xl p-6 sticky top-24 ${d ? "bg-white/4" : "bg-white shadow-sm"}`}>
-                <h2 className={`text-lg font-semibold mb-6 ${d ? "text-white" : "text-black"}`}>Order Summary</h2>
+              <div className="border border-purple-500/15 rounded-2xl p-6 sticky top-24 bg-white shadow-sm dark:bg-white/4 dark:shadow-none">
+                <h2 className="text-lg font-semibold mb-6 text-black dark:text-white">Order Summary</h2>
 
                 <div className="flex flex-col gap-3 text-sm mb-6">
-                  <div className={`flex justify-between ${d ? "text-gray-400" : "text-gray-500"}`}>
+                  <div className="flex justify-between text-gray-500 dark:text-gray-400">
                     <span>Subtotal</span>
-                    <span className={d ? "text-white" : "text-black"}>Rp {subtotal.toLocaleString("id-ID")}</span>
+                    <span className="text-black dark:text-white">Rp {subtotal.toLocaleString("id-ID")}</span>
                   </div>
-                  <div className={`flex justify-between ${d ? "text-gray-400" : "text-gray-500"}`}>
+                  <div className="flex justify-between text-gray-500 dark:text-gray-400">
                     <span>Shipping</span>
-                    <span className={d ? "text-white" : "text-black"}>Rp {shipping.toLocaleString("id-ID")}</span>
+                    <span className="text-black dark:text-white">Rp {shipping.toLocaleString("id-ID")}</span>
                   </div>
-                  <div className={`border-t pt-3 flex justify-between font-bold text-base ${d ? "border-white/8" : "border-black/8"}`}>
-                    <span className={d ? "text-white" : "text-black"}>Total</span>
+                  <div className="border-t pt-3 flex justify-between font-bold text-base border-black/8 dark:border-white/8">
+                    <span className="text-black dark:text-white">Total</span>
                     <span className="text-purple-400">Rp {total.toLocaleString("id-ID")}</span>
                   </div>
                 </div>
 
                 <Link to="/checkout">
-                  <button className={`w-full py-3 font-semibold rounded-xl transition text-sm ${d ? "bg-white text-black hover:bg-gray-100" : "bg-black text-white hover:bg-zinc-800"}`}>
+                  <button className="w-full py-3 font-semibold rounded-xl transition text-sm bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-gray-100">
                     Checkout →
                   </button>
                 </Link>
                 <Link to="/products">
-                  <button className={`w-full py-3 border rounded-xl transition text-sm mt-3 ${d ? "border-white/10 text-white hover:border-purple-500/30 hover:text-purple-300" : "border-black/10 text-black hover:border-purple-500/30 hover:text-purple-600"}`}>
+                  <button className="w-full py-3 border rounded-xl transition text-sm mt-3 border-black/10 text-black hover:border-purple-500/30 hover:text-purple-600 dark:border-white/10 dark:text-white dark:hover:border-purple-500/30 dark:hover:text-purple-300">
                     Lanjut Belanja
                   </button>
                 </Link>
