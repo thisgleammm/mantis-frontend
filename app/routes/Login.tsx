@@ -19,6 +19,7 @@ export async function clientAction({ request }: { request: Request }) {
 
         if (data.token || data.message === "logged in successfully") {
             localStorage.setItem("is_logged_in", "true");
+            localStorage.setItem("token", data.token);
             return redirect("/");
         } else if (data.message === "email tidak terdaftar") {
             return redirect(`/register?email=${encodeURIComponent(email)}`);
