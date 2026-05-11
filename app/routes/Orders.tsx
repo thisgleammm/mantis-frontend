@@ -2,6 +2,7 @@ import { Link, redirect } from "react-router"
 import { useState } from "react"
 import { OrderCardSkeleton } from "../components/Skeleton"
 import { useTheme } from "../hooks/useTheme"
+import { Surface } from "../components/Surface"
 
 export const loader = async () => {
   const authStatus = typeof window !== "undefined"
@@ -130,14 +131,14 @@ export default function Orders() {
                     </span>
                   </div>
 
-                  <div className="flex flex-col gap-2 mb-4 rounded-xl p-3 bg-black/2 dark:bg-white/2">
+                  <Surface variant="secondary" className="flex flex-col gap-2 mb-4 rounded-xl p-3">
                     {order.items.map(item => (
                       <div key={item.id} className="flex justify-between text-sm">
                         <span className="text-gray-500 dark:text-gray-400">{item.product_name} x{item.quantity}</span>
                         <span className="text-black dark:text-white">Rp {item.price_at_purchase.toLocaleString("id-ID")}</span>
                       </div>
                     ))}
-                  </div>
+                  </Surface>
 
                   <div className="border-t pt-4 flex items-center justify-between border-black/8 dark:border-white/8">
                     <div className="text-sm text-gray-400 dark:text-gray-500">
