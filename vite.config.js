@@ -15,4 +15,7 @@ export default defineConfig({
       },
     },
   },
+  ssr: {
+    noExternal: ["@heroui/react", "@heroui/styles", "@react-aria/*", "react-aria-components", "framer-motion"],
+  },
 });
