@@ -157,26 +157,23 @@ export default function Products() {
                   )}
 
                   {/* Discount Badge */}
-                  {Boolean(
-                    product.discount_price &&
-                      product.discount_price < product.base_price,
-                  ) && (
+                  {product.discount_price && product.discount_price < product.base_price ? (
                     <div className="absolute top-2 right-2 z-10">
-                        <Chip
-                          color="danger"
-                          variant="primary"
+                      <Chip
+                        color="danger"
+                        variant="primary"
                           size="md" 
-                          className="font-bold shadow-lg"
-                        >
-                          {Math.round(
-                            ((product.base_price - (product.discount_price || 0)) /
-                              product.base_price) *
-                              100,
-                          )}
-                          % OFF
-                        </Chip>
-                      </div>
-                    )}
+                        className="font-bold shadow-lg"
+                      >
+                        {Math.round(
+                          ((product.base_price - (product.discount_price || 0)) /
+                            product.base_price) *
+                            100,
+                        )}
+                        % OFF
+                      </Chip>
+                    </div>
+                  ) : null}
 
                 </div>
 
@@ -198,7 +195,7 @@ export default function Products() {
                       {((product.discount_price &&
                       product.discount_price < product.base_price
                         ? product.discount_price
-                        : product.base_price) || 0) > 0 && (
+                        : product.base_price) || 0) > 0 ? (
                         <span className="text-lg font-black text-accent">
                           Rp{" "}
                           {(product.discount_price &&
@@ -207,17 +204,15 @@ export default function Products() {
                             : product.base_price
                           ).toLocaleString("id-ID")}
                         </span>
-                      )}
-                      {Boolean(
-                        product.discount_price &&
-                          product.discount_price > 0 &&
-                          product.discount_price < product.base_price &&
-                          product.base_price > 0,
-                      ) && (
+                      ) : null}
+                      {product.discount_price &&
+                      product.discount_price > 0 &&
+                      product.discount_price < product.base_price &&
+                      product.base_price > 0 ? (
                         <span className="text-[10px] text-muted-foreground line-through decoration-muted-foreground/50">
                           Rp {product.base_price.toLocaleString("id-ID")}
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 </Card.Content>

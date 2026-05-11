@@ -105,11 +105,11 @@ export default function Home() {
                   "🛍️"
                 )}
               </div>
-              {heroProduct?.discount_price && heroProduct.discount_price < heroProduct.base_price && (
+              {heroProduct?.discount_price && heroProduct.discount_price < heroProduct.base_price ? (
                 <div className="absolute -top-4 -right-4 text-xs font-black px-4 py-2 rounded-2xl shadow-lg bg-black text-white dark:bg-white dark:text-black">
                   {Math.round(((heroProduct.base_price - heroProduct.discount_price) / heroProduct.base_price) * 100)}% OFF
                 </div>
-              )}
+              ) : null}
               <div className="absolute -bottom-4 -left-4 border backdrop-blur rounded-2xl px-4 py-3 text-xs shadow-lg bg-black/5 border-black/10 dark:bg-white/8 dark:border-white/15">
                 <p className="text-[10px] uppercase tracking-widest mb-1 text-gray-500">Best Seller</p>
                 <p className="font-bold text-black">{heroProduct?.name || "Macbook Pro M5"}</p>

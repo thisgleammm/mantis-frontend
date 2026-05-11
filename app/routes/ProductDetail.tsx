@@ -112,18 +112,18 @@ export default function ProductDetail() {
                     <p className="text-3xl font-bold text-black dark:text-white">
                       Rp {product.discount_price.toLocaleString("id-ID")}
                     </p>
-                    {product.base_price > 0 && (
+                    {product.base_price > 0 ? (
                       <p className="text-lg line-through text-gray-400 dark:text-gray-500">
                         Rp {product.base_price.toLocaleString("id-ID")}
                       </p>
-                    )}
+                    ) : null}
                   </div>
                 ) : (
-                  product.base_price > 0 && (
+                  product.base_price > 0 ? (
                     <p className="text-3xl font-bold text-black dark:text-white">
                       Rp {product.base_price.toLocaleString("id-ID")}
                     </p>
-                  )
+                  ) : null
                 )}
               </div>
 
@@ -137,7 +137,7 @@ export default function ProductDetail() {
                 </span>
               </div>
 
-              {product.variants && product.variants.length > 0 && (
+              {product.variants && product.variants.length > 0 ? (
                 <div className="mb-6">
                   <p className="text-sm mb-2 text-gray-500 dark:text-gray-400">
                     Pilih Varian:
@@ -153,7 +153,7 @@ export default function ProductDetail() {
                     ))}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
 
             <div className="flex gap-3 mt-6">
