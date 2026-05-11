@@ -72,7 +72,7 @@ export default function Home() {
           <div className="flex-1 z-10">
             <Chip color="accent" variant="soft" >
               <Flame color="#ff0000" size={14} />
-              <Chip.Label>LIMITED TIME OFFER</Chip.Label>
+              LIMITED TIME OFFER
             </Chip>
             <h1 className="mt-5 mb-3 leading-none" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
               <span className="block text-6xl font-bold tracking-tight text-black dark:text-white ">Up to</span>

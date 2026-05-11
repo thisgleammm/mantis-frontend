@@ -1,22 +1,22 @@
 import { Skeleton } from "@heroui/react";
-import { Card } from "./Card";
+import { Card, CardHeader, CardContent } from "./Card";
 
 export function ProductCardSkeleton() {
   return (
     <Card className="border border-black/8 bg-white dark:border-white/8 dark:bg-white/4">
       <Skeleton className="aspect-[4/3] w-full" />
-      <Card.Header className="flex flex-col gap-3 p-4">
+      <CardHeader className="flex flex-col gap-3 p-4">
         <div className="flex justify-between items-center w-full">
           <Skeleton className="h-5 w-2/3 rounded-lg" />
           <Skeleton className="h-4 w-10 rounded-lg" />
         </div>
-      </Card.Header>
-      <Card.Content className="px-4 pb-6">
+      </CardHeader>
+      <CardContent className="px-4 pb-6">
         <div className="flex items-center gap-2">
           <Skeleton className="h-7 w-1/2 rounded-lg" />
           <Skeleton className="h-3 w-1/4 rounded-lg" />
         </div>
-      </Card.Content>
+      </CardContent>
     </Card>
   );
 }

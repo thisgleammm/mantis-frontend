@@ -9,3 +9,4 @@ import { Card as HeroCard } from "@heroui/react";
  * Wraps HeroUI's Card component for consistent usage across the app.
  */
 export const Card = HeroCard;
+export { CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@heroui/react";

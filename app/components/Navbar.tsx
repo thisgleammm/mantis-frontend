@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router"
 import { useState, useEffect } from "react"
 import { useTheme } from "../hooks/useTheme"
-import { Button, Dropdown, Label } from "@heroui/react"
+import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react"
 import { Sun, Moon, ShoppingCart, Package, LogOut, User as UserIcon } from "lucide-react"
 import { logout, getCurrentUser } from "../services/authService"
 
@@ -103,39 +103,42 @@ export default function AppNavbar() {
 
           {isLoggedIn ? (
             <Dropdown>
-              <Button 
-                isIconOnly
-                variant="secondary" 
-                className="w-10 h-10 rounded-full font-bold text-sm bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all ml-2"
+              <DropdownTrigger>
+                <Button 
+                  isIconOnly
+                  variant="secondary" 
+                  className="w-10 h-10 rounded-full font-bold text-sm bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all ml-2"
+                >
+                  {getInitials(userName ?? "U")}
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu 
+                aria-label="User menu"
+                className="bg-background border border-border/50 shadow-xl shadow-black/5 dark:shadow-black/40 rounded-2xl min-w-48 p-1"
               >
-                {getInitials(userName ?? "U")}
-              </Button>
-              <Dropdown.Popover className="bg-background border border-border/50 shadow-xl shadow-black/5 dark:shadow-black/40 rounded-2xl min-w-48 p-1">
-                <Dropdown.Menu>
-                  <Dropdown.Item id="profile" textValue="Profile" className="h-14 gap-2 opacity-100 cursor-default pointer-events-none mb-1 px-3">
-                    <Label className="text-xs text-foreground/50 font-medium block">Masuk sebagai</Label>
-                    <Label className="text-sm font-bold truncate text-foreground block">{userName}</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item 
-                    id="orders" 
-                    href="/orders" 
-                    textValue="Orders"
-                    className="text-foreground/80 font-medium rounded-xl mb-1 px-3 flex items-center gap-2"
-                  >
-                    <Package size={16} className="text-foreground/60"/>
-                    <Label>Orders</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item 
-                    id="logout" 
-                    textValue="Logout"
-                    className="text-danger font-medium rounded-xl px-3 flex items-center gap-2 data-[hovered]:bg-danger/10" 
-                    onAction={handleLogout}
-                  >
-                    <LogOut size={16}/>
-                    <Label className="text-danger">Logout</Label>
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown.Popover>
+                <DropdownItem key="profile" textValue="Profile" className="h-14 gap-2 opacity-100 cursor-default pointer-events-none mb-1 px-3">
+                  <span className="text-xs text-foreground/50 font-medium block">Masuk sebagai</span>
+                  <span className="text-sm font-bold truncate text-foreground block">{userName}</span>
+                </DropdownItem>
+                <DropdownItem 
+                  key="orders" 
+                  href="/orders" 
+                  textValue="Orders"
+                  className="text-foreground/80 font-medium rounded-xl mb-1 px-3 flex items-center gap-2"
+                >
+                  <Package size={16} className="text-foreground/60"/>
+                  <span>Orders</span>
+                </DropdownItem>
+                <DropdownItem 
+                  key="logout" 
+                  textValue="Logout"
+                  className="text-danger font-medium rounded-xl px-3 flex items-center gap-2 data-[hovered]:bg-danger/10" 
+                  onAction={handleLogout}
+                >
+                  <LogOut size={16}/>
+                  <span className="text-danger">Logout</span>
+                </DropdownItem>
+              </DropdownMenu>
             </Dropdown>
           ) : (
             <Link to="/login" className="flex items-center ml-2">

@@ -4,7 +4,7 @@ import { Star, Search, SearchX } from "lucide-react";
 import { getAllProducts } from "../services/productService";
 import { ProductCardSkeleton } from "../components/Skeleton";
 import { useTheme } from "../hooks/useTheme";
-import { Card } from "../components/Card";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/Card";
 import { Surface } from "../components/Surface";
 import { Chip } from "../components/Chip";
 import { Kbd } from "../components/Kbd";
@@ -108,10 +108,10 @@ export default function Products() {
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-12 pr-12 py-4.5 rounded-2xl border-0 text-base outline-none transition-all duration-300 bg-surface border-black/5 text-foreground placeholder-muted-foreground/40 focus:ring-2 focus:ring-accent/30 dark:bg-black/40 dark:border-white/5 hover:bg-surface/80"
               />
-              <Kbd className="absolute right-4 pointer-events-none group-focus-within:hidden border-black/5 dark:border-white/5">
-                <Kbd.Abbr keyValue={isMac ? "command" : "ctrl"} />
-                <Kbd.Content>K</Kbd.Content>
-              </Kbd>
+                <Kbd className="absolute right-4 pointer-events-none group-focus-within:hidden border-black/5 dark:border-white/5">
+                  <Kbd.Abbr keyValue={isMac ? "command" : "ctrl"} />
+                  <Kbd.Content>K</Kbd.Content>
+                </Kbd>
             </div>
           </div>
         </Surface>
@@ -177,19 +177,19 @@ export default function Products() {
 
                 </div>
 
-                <Card.Header className="flex flex-col items-start gap-1 p-4 pb-0">
+                <CardHeader className="flex flex-col items-start gap-1 p-4 pb-0">
                   <div className="flex justify-between items-start w-full gap-2">
-                    <Card.Title className="text-base font-bold tracking-tight transition-colors group-hover:text-accent line-clamp-1 flex-1">
+                    <CardTitle className="text-base font-bold tracking-tight transition-colors group-hover:text-accent line-clamp-1 flex-1">
                       {product.name}
-                    </Card.Title>
+                    </CardTitle>
                     <div className="flex items-center gap-1 text-xs font-medium text-amber-500 shrink-0">
                       <Star size={14} fill="currentColor" />
                       <span>{product.rating_average || 0}</span>
                     </div>
                   </div>
-                </Card.Header>
+                </CardHeader>
 
-                <Card.Content className="p-4 pt-2 pb-5">
+                <CardContent className="p-4 pt-2 pb-5">
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
                       {((product.discount_price &&
@@ -215,7 +215,7 @@ export default function Products() {
                       ) : null}
                     </div>
                   </div>
-                </Card.Content>
+                </CardContent>
               </Card>
             ))}
           </div>
