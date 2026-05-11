@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useTheme } from "../hooks/useTheme";
+import { Surface } from "../components/Surface";
+import { Button } from "../components/Button";
 import {
   getCart,
   getCartItems,
@@ -49,12 +51,11 @@ export default function Cart() {
   const fetchCart = async () => {
     try {
       const cartData = await getCart();
-      console.log("CART:", cartData);
+    
 
       const cart = Array.isArray(cartData) ? cartData[0] : cartData?.data?.[0];
 
       if (!cart?.id) {
-        console.log("Cart kosong atau belum ada");
         setLoading(false);
         return;
       }
@@ -62,7 +63,6 @@ export default function Cart() {
       setCartId(cart.id);
 
       const itemsData = await getCartItems(cart.id);
-      console.log("ITEMS:", itemsData);
 
       const items = itemsData?.items ?? itemsData?.data ?? itemsData ?? [];
       setCartItems(Array.isArray(items) ? items : []);
@@ -209,9 +209,8 @@ export default function Cart() {
               )})}
             </div>
 
-            {/* Summary */}
             <div className="w-full lg:w-80 flex-shrink-0">
-              <div className="border border-purple-500/15 rounded-2xl p-6 sticky top-24 bg-white shadow-sm dark:bg-white/4 dark:shadow-none">
+              <Surface variant="default" className="border border-purple-500/15 rounded-2xl p-6 sticky top-24 shadow-sm dark:shadow-none">
                 <h2 className="text-lg font-semibold mb-6 text-black dark:text-white">
                   Order Summary
                 </h2>
@@ -237,17 +236,22 @@ export default function Cart() {
                   </div>
                 </div>
 
-                <Link to="/checkout">
-                  <button className="w-full py-3 font-semibold rounded-xl transition text-sm bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-gray-100">
-                    Checkout →
-                  </button>
-                </Link>
-                <Link to="/products">
-                  <button className="w-full py-3 border rounded-xl transition text-sm mt-3 border-black/10 text-black hover:border-purple-500/30 hover:text-purple-600 dark:border-white/10 dark:text-white dark:hover:border-purple-500/30 dark:hover:text-purple-300">
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    className="w-full" 
+                    onPress={() => navigate("/checkout")}
+                  >
+                    Checkout
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    className="w-full mt-2" 
+                    onPress={() => navigate("/products")}
+                  >
                     Lanjut Belanja
-                  </button>
-                </Link>
-              </div>
+                  </Button>
+                </div>
+              </Surface>
             </div>
           </div>
         )}

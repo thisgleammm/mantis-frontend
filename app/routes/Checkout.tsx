@@ -150,7 +150,7 @@ export default function Checkout() {
                     <div className="w-4 h-4 border-2 rounded-full animate-spin border-white/20 border-t-white dark:border-black/20 dark:border-t-black" />
                     Memproses...
                   </>
-                ) : "Bayar Sekarang →"}
+                ) : "Bayar Sekarang"}
               </button>
             </div>
           </div>

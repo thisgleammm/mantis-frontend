@@ -1,9 +1,12 @@
 import { useParams, Link, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
+import { Star } from "lucide-react";
 import { getProductById } from "../services/productService";
 import { getCart, getCartItems, addToCart, updateCartItem } from "../services/cartService";
 import { ProductDetailSkeleton } from "../components/Skeleton";
 import { useTheme } from "../hooks/useTheme";
+import { Surface } from "../components/Surface";
+import { Button } from "../components/Button";
 import type { Product } from "../types";
 
 export default function ProductDetail() {
@@ -79,7 +82,17 @@ export default function ProductDetail() {
 
         <div className="flex flex-col lg:flex-row gap-10 mt-4">
           <div className="flex-1 rounded-2xl flex items-center justify-center text-8xl min-h-72 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-900 dark:to-zinc-800">
-            🛍️
+            {product.images && product.images.length > 0 ? (
+              <img 
+                src={product.images.sort((a, b) => a.sort_order - b.sort_order)[0].image_url} 
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-8xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-900 dark:to-zinc-800">
+                🛍️
+              </div>
+            )}
           </div>
 
           <div className="flex-1 flex flex-col justify-between">
@@ -92,24 +105,30 @@ export default function ProductDetail() {
               </p>
 
               <div className="mb-6">
-                {product.discount_price ? (
+                {product.discount_price &&
+                product.discount_price > 0 &&
+                product.discount_price < product.base_price ? (
                   <div className="flex items-center gap-3">
                     <p className="text-3xl font-bold text-black dark:text-white">
                       Rp {product.discount_price.toLocaleString("id-ID")}
                     </p>
-                    <p className="text-lg line-through text-gray-400 dark:text-gray-500">
-                      Rp {product.base_price.toLocaleString("id-ID")}
-                    </p>
+                    {product.base_price > 0 && (
+                      <p className="text-lg line-through text-gray-400 dark:text-gray-500">
+                        Rp {product.base_price.toLocaleString("id-ID")}
+                      </p>
+                    )}
                   </div>
                 ) : (
-                  <p className="text-3xl font-bold text-black dark:text-white">
-                    Rp {product.base_price.toLocaleString("id-ID")}
-                  </p>
+                  product.base_price > 0 && (
+                    <p className="text-3xl font-bold text-black dark:text-white">
+                      Rp {product.base_price.toLocaleString("id-ID")}
+                    </p>
+                  )
                 )}
               </div>
 
               <div className="flex items-center gap-2 mb-6">
-                <span className="text-yellow-400">⭐</span>
+                <Star size={18} fill="currentColor" className="text-yellow-400" />
                 <span className="text-sm text-gray-600 dark:text-gray-300">
                   {product.rating_average ?? 0} / 5.0
                 </span>
@@ -138,18 +157,20 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 py-3 rounded-xl border text-sm transition border-black/15 text-black hover:bg-black/5 dark:border-white/15 dark:text-white dark:hover:bg-white/10"
+              <Button
+                variant="outline"
+                className="flex-1"
+                onPress={handleAddToCart}
               >
                 + Tambah ke Cart
-              </button>
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold transition bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+              </Button>
+              <Button
+                variant="primary"
+                className="flex-1 font-bold"
+                onPress={handleAddToCart}
               >
                 Beli Sekarang
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -161,22 +182,23 @@ export default function ProductDetail() {
           {product.reviews && product.reviews.length > 0 ? (
             <div className="flex flex-col gap-4">
               {product.reviews.map((review) => (
-                <div
+                <Surface
                   key={review.id}
-                  className="border rounded-2xl p-4 bg-white border-black/8 dark:bg-white/4 dark:border-white/8"
+                  variant="secondary"
+                  className="border rounded-2xl p-6 transition-all hover:border-accent/20 border-black/5 dark:border-white/5"
                 >
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <span className="text-yellow-400 text-sm">
                       {"⭐".repeat(review.rating)}
                     </span>
-                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {review.created_at?.slice(0, 10)}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-foreground leading-relaxed">
                     {review.comment}
                   </p>
-                </div>
+                </Surface>
               ))}
             </div>
           ) : (

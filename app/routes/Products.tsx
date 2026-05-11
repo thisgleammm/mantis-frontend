@@ -1,42 +1,39 @@
-import { Link, useNavigate } from "react-router";
-import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useState, useEffect, useRef } from "react";
+import { Star, Search, SearchX } from "lucide-react";
 import { getAllProducts } from "../services/productService";
-import { getCart, getCartItems, addToCart, updateCartItem } from "../services/cartService";
 import { ProductCardSkeleton } from "../components/Skeleton";
 import { useTheme } from "../hooks/useTheme";
+import { Card } from "../components/Card";
+import { Surface } from "../components/Surface";
+import { Chip } from "../components/Chip";
+import { Kbd } from "../components/Kbd";
 import type { Product } from "../types";
 
 export default function Products() {
   const { isDark } = useTheme();
   const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [isMac, setIsMac] = useState(false);
 
-  const handleAddToCart = async (productId: number) => {
-    try {
-      const cartData = await getCart();
-      const cart = Array.isArray(cartData) ? cartData[0] : cartData?.data?.[0];
-      if (!cart?.id) {
-        navigate("/login");
-        return;
-      }
-      const itemsData = await getCartItems(cart.id);
-      const items: any[] = Array.isArray(itemsData)
-        ? itemsData
-        : itemsData?.items ?? itemsData?.data ?? [];
-      const existingItem = items.find((i: any) => i.product_id === productId);
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().indexOf("MAC") >= 0);
 
-      if (existingItem) {
-        await updateCartItem(cart.id, existingItem.id, existingItem.quantity + 1);
-      } else {
-        await addToCart(cart.id, productId, null, 1);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const modifier = isMac ? e.metaKey : e.ctrlKey;
+      if (modifier && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
       }
-      navigate("/cart");
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMac]);
+
 
   useEffect(() => {
     const fetchProducts = () => {
@@ -80,92 +77,151 @@ export default function Products() {
   return (
     <div className="min-h-screen px-6 py-10 font-sans bg-gray-50 text-black dark:bg-black dark:text-white">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">All Products</h1>
-            <p className="text-sm mt-1 text-gray-400 dark:text-gray-500">
-              <span className="text-purple-400">{filtered.length}</span>{" "}
-              products found
+        {/* Header & Search */}
+        <Surface 
+          variant="secondary" 
+          className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-8 p-10 rounded-[2.5rem] border border-black/5 dark:border-white/5 shadow-2xl shadow-black/5 dark:shadow-none"
+        >
+          <div className="space-y-1">
+            <h1 className="text-5xl font-black tracking-tight bg-gradient-to-br from-black to-zinc-500 dark:from-white dark:to-zinc-500 bg-clip-text text-transparent">
+              All Products
+            </h1>
+            <p className="text-base text-muted-foreground font-medium flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              Showing <span className="text-foreground font-bold">{filtered.length}</span> products
             </p>
           </div>
 
           {/* Search */}
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500">
-              🔍
-            </span>
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-72 pl-9 pr-4 py-3 rounded-xl border text-sm outline-none transition bg-white border-black/10 text-black placeholder-gray-400 focus:border-purple-500/40 focus:bg-purple-500/5 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder-gray-600 dark:focus:border-purple-500/40 dark:focus:bg-purple-500/5"
-            />
+          <div className="relative group w-full md:w-96">
+            <div className="absolute inset-0 bg-accent/5 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+            <div className="relative flex items-center">
+              <Search 
+                size={20} 
+                className="absolute left-4 text-muted-foreground group-focus-within:text-accent transition-colors duration-300" 
+              />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-12 pr-12 py-4.5 rounded-2xl border-0 text-base outline-none transition-all duration-300 bg-surface border-black/5 text-foreground placeholder-muted-foreground/40 focus:ring-2 focus:ring-accent/30 dark:bg-black/40 dark:border-white/5 hover:bg-surface/80"
+              />
+              <Kbd className="absolute right-4 pointer-events-none group-focus-within:hidden border-black/5 dark:border-white/5">
+                <Kbd.Abbr keyValue={isMac ? "command" : "ctrl"} />
+                <Kbd.Content>K</Kbd.Content>
+              </Kbd>
+            </div>
           </div>
-        </div>
+        </Surface>
 
         {/* Grid */}
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 text-center">
-            <span className="text-5xl mb-4">🔍</span>
-            <h2 className="text-lg font-semibold mb-1 text-black dark:text-white">
-              Produk tidak ditemukan
+          <div className="flex flex-col items-center justify-center py-40 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="w-24 h-24 rounded-3xl bg-surface-secondary flex items-center justify-center mb-8 border border-black/5 dark:border-white/5">
+              <SearchX size={48} className="text-muted-foreground/30" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2 text-foreground">
+              No results found
             </h2>
-            <p className="text-sm text-gray-400 dark:text-gray-500">
-              Coba kata kunci lain
+            <p className="text-muted-foreground max-w-xs mx-auto">
+              We couldn't find anything matching "<span className="text-foreground font-semibold">{search}</span>". 
+              Try a different keyword.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filtered.map((product) => (
-              <div
+              <Card
                 key={product.id}
-                className="group border rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all duration-200 bg-white border-black/8 hover:border-purple-500/30 hover:shadow-purple-500/10 dark:bg-white/4 dark:border-white/8 dark:hover:border-purple-500/30 dark:hover:shadow-purple-500/10"
+                onClick={() => navigate(`/products/${product.slug}`)}
+                className="group border border-black/8 bg-white transition-all duration-300 dark:border-white/8 dark:bg-white/4 cursor-pointer"
               >
-                {/* Image */}
-                <div className="h-48 flex items-center justify-center text-5xl relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-900 dark:to-zinc-800">
-                  🛍️
-                  <div className="absolute inset-0 bg-purple-500/0 group-hover:bg-purple-500/5 transition-all duration-200" />
-                </div>
+                {/* Image Container */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden">
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={
+                        [...product.images].sort(
+                          (a, b) => a.sort_order - b.sort_order,
+                        )[0].image_url
+                      }
+                      alt={product.name}
+                      className="h-full w-full object-cover transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-surface-secondary text-5xl">
+                      🛍️
+                    </div>
+                  )}
 
-                {/* Content */}
-                <div className="p-4">
-                  <h3 className="text-base font-semibold mb-1 transition text-black group-hover:text-purple-700 dark:text-white dark:group-hover:text-purple-100">
-                    {product.name}
-                  </h3>
-                  <p className="text-xs mb-3 line-clamp-2 text-gray-400 dark:text-gray-500">
-                    {product.description}
-                  </p>
-
-                  {/* Price */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <p className="text-lg font-bold text-black dark:text-white">
-                      Rp {product.base_price.toLocaleString("id-ID")}
-                    </p>
-                    {product.discount_price && (
-                      <p className="text-xs line-through text-gray-400 dark:text-gray-500">
-                        Rp {product.discount_price.toLocaleString("id-ID")}
-                      </p>
+                  {/* Discount Badge */}
+                  {Boolean(
+                    product.discount_price &&
+                      product.discount_price < product.base_price,
+                  ) && (
+                    <div className="absolute top-2 right-2 z-10">
+                        <Chip
+                          color="danger"
+                          variant="primary"
+                          size="md" 
+                          className="font-bold shadow-lg"
+                        >
+                          {Math.round(
+                            ((product.base_price - (product.discount_price || 0)) /
+                              product.base_price) *
+                              100,
+                          )}
+                          % OFF
+                        </Chip>
+                      </div>
                     )}
-                  </div>
 
-                  {/* Buttons */}
-                  <div className="flex gap-2">
-                    <Link to={`/products/${product.slug}`} className="flex-1">
-                      <button className="w-full py-2 rounded-xl border text-sm transition border-black/10 text-black hover:border-purple-500/40 hover:text-purple-600 dark:border-white/10 dark:text-white dark:hover:border-purple-500/40 dark:hover:text-purple-300">
-                        Detail
-                      </button>
-                    </Link>
-                    <button
-                      onClick={() => handleAddToCart(product.id)}
-                      className="flex-1 py-2 rounded-xl text-sm font-semibold transition bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                    >
-                      + Cart
-                    </button>
-                  </div>
                 </div>
-              </div>
+
+                <Card.Header className="flex flex-col items-start gap-1 p-4 pb-0">
+                  <div className="flex justify-between items-start w-full gap-2">
+                    <Card.Title className="text-base font-bold tracking-tight transition-colors group-hover:text-accent line-clamp-1 flex-1">
+                      {product.name}
+                    </Card.Title>
+                    <div className="flex items-center gap-1 text-xs font-medium text-amber-500 shrink-0">
+                      <Star size={14} fill="currentColor" />
+                      <span>{product.rating_average || 0}</span>
+                    </div>
+                  </div>
+                </Card.Header>
+
+                <Card.Content className="p-4 pt-2 pb-5">
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex items-center gap-2">
+                      {((product.discount_price &&
+                      product.discount_price < product.base_price
+                        ? product.discount_price
+                        : product.base_price) || 0) > 0 && (
+                        <span className="text-lg font-black text-accent">
+                          Rp{" "}
+                          {(product.discount_price &&
+                          product.discount_price < product.base_price
+                            ? product.discount_price
+                            : product.base_price
+                          ).toLocaleString("id-ID")}
+                        </span>
+                      )}
+                      {Boolean(
+                        product.discount_price &&
+                          product.discount_price > 0 &&
+                          product.discount_price < product.base_price &&
+                          product.base_price > 0,
+                      ) && (
+                        <span className="text-[10px] text-muted-foreground line-through decoration-muted-foreground/50">
+                          Rp {product.base_price.toLocaleString("id-ID")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Card.Content>
+              </Card>
             ))}
           </div>
         )}
