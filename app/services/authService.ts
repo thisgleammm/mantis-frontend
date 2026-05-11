@@ -12,6 +12,10 @@ export const login = async (email: string, password: string): Promise<any> => {
 };
 
 export const logout = async (): Promise<any> => {
+  // Clear client-side cookies
+  document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
   const response = await fetch(`${BASE_URL}/auth/logout`, {
     method: "POST",
     credentials: "include",
