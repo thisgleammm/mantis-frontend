@@ -1,6 +1,10 @@
 import { Link, Form, redirect, useNavigation, useActionData } from "react-router";
+import { TextField, Label, Input, FieldError } from "@heroui/react";
 import { login } from "../services/authService";
 import { useTheme } from "../hooks/useTheme";
+import Button from "../components/Button";
+import Alert from "../components/Alert";
+import { Surface } from "../components/Surface";
 
 export async function clientAction({ request }: { request: Request }) {
     const formData = await request.formData();
@@ -51,46 +55,57 @@ export default function Login() {
                     <h1 className="text-3xl font-bold mb-2 text-black dark:text-white">Sign In</h1>
                 </div>
 
-                <div className="border rounded-2xl p-8 backdrop-blur bg-white border-black/8 shadow-sm dark:bg-white/4 dark:border-white/8 dark:shadow-none">
+                <Surface 
+                    variant="default" 
+                    className="border rounded-2xl p-8 backdrop-blur border-black/8 shadow-sm dark:border-white/8 dark:shadow-none"
+                >
 
                     {actionData?.error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
-                            <span className="text-base">⚠️</span>
-                            {actionData.error}
-                        </div>
+                        <Alert 
+                            status="danger" 
+                            description={actionData.error} 
+                            className="mb-6"
+                        />
                     )}
 
                     <Form method="post" className="flex flex-col gap-4">
-                        <div>
-                            <label className="text-xs mb-1 block text-gray-500 dark:text-gray-400">Email</label>
-                            <input
-                                type="email"
-                                name="email"
-                                placeholder="email@example.com"
-                                required
-                                className={inputClass}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="text-xs mb-1 block text-gray-500 dark:text-gray-400">Password</label>
-                            <input
-                                type="password"
-                                name="password"
-                                placeholder="••••••••"
-                                minLength={8}
-                                required
-                                className={inputClass}
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-3 font-semibold rounded-xl transition text-sm mt-2 disabled:opacity-50 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                        <TextField 
+                            name="email" 
+                            type="email" 
+                            isRequired
+                            isInvalid={!!actionData?.error && actionData.error.toLowerCase().includes("email")}
+                            className="flex flex-col gap-1"
                         >
-                            {loading ? "Loading..." : "Login"}
-                        </button>
+                            <Label className="text-xs block text-gray-500 dark:text-gray-400">Email</Label>
+                            <Input
+                                placeholder="email@example.com"
+                                className={inputClass}
+                            />
+                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.error}</FieldError>
+                        </TextField>
+
+                        <TextField 
+                            name="password" 
+                            type="password" 
+                            isRequired
+                            isInvalid={!!actionData?.error && actionData.error.toLowerCase().includes("password")}
+                            className="flex flex-col gap-1"
+                        >
+                            <Label className="text-xs block text-gray-500 dark:text-gray-400">Password</Label>
+                            <Input
+                                placeholder="••••••••"
+                                className={inputClass}
+                            />
+                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.error}</FieldError>
+                        </TextField>  
+                        
+                        <Button
+                            type="submit"
+                            loading={loading}
+                            className="w-full mt-2"
+                        >
+                            Login
+                        </Button>
                     </Form>
 
                     <p className="text-center text-sm mt-6 text-gray-400 dark:text-gray-500">
@@ -99,7 +114,7 @@ export default function Login() {
                             Register
                         </Link>
                     </p>
-                </div>
+                </Surface>
             </div>
         </div>
     );
