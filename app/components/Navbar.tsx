@@ -1,53 +1,21 @@
 import { Link, useNavigate, useLocation } from "react-router"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
+import { useTheme } from "../hooks/useTheme"
+import { Button, Dropdown, Label } from "@heroui/react"
+import { Sun, Moon, ShoppingCart, Package, LogOut, User as UserIcon } from "lucide-react"
 import { logout, getCurrentUser } from "../services/authService"
 
 function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map(word => word[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase()
+  return name.split(" ").map(word => word[0]).slice(0, 2).join("").toUpperCase()
 }
 
-// Cart icon SVG
-function CartIcon({ className }: { className?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className ?? "w-5 h-5"}>
-      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <path d="M16 10a4 4 0 0 1-8 0" />
-    </svg>
-  )
-}
-
-export default function Navbar() {
+export default function AppNavbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [userName, setUserName] = useState<string | null>(null)
-  const [scrolled, setScrolled] = useState(false)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [isDark, setIsDark] = useState(true)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const { toggleTheme } = useTheme()
 
   const isLoggedIn = userName !== null
-
-  // Init theme
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "dark"
-    setIsDark(savedTheme === "dark")
-    document.documentElement.classList.remove("dark", "light")
-    document.documentElement.classList.add(savedTheme)
-  }, [])
-
-  // Listen for theme changes from other components
-  useEffect(() => {
-    const handler = () => setIsDark((localStorage.getItem("theme") || "dark") === "dark")
-    window.addEventListener("themechange", handler)
-    return () => window.removeEventListener("themechange", handler)
-  }, [])
 
   // Auth
   useEffect(() => {
@@ -58,184 +26,130 @@ export default function Navbar() {
         .catch(() => { })
     }
     if (!authStatus) setUserName(null)
-  }, [location.pathname])
-
-  // Scroll
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  // Click outside dropdown
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  }, [location.pathname, userName])
 
   const handleLogout = async () => {
     try { await logout() } catch { }
     finally {
       localStorage.removeItem("is_logged_in")
       setUserName(null)
-      setDropdownOpen(false)
       navigate("/login")
     }
   }
 
-  const toggleTheme = () => {
-    const newTheme = isDark ? "light" : "dark"
-    setIsDark(!isDark)
-    localStorage.setItem("theme", newTheme)
-    document.documentElement.classList.remove("dark", "light")
-    document.documentElement.classList.add(newTheme)
-    window.dispatchEvent(new Event("themechange"))
-  }
-
-  // Cart click — redirect to login if not logged in
-  const handleCartClick = (e: React.MouseEvent) => {
+  const handleCartClick = (e: any) => {
     if (!isLoggedIn) {
       e.preventDefault()
       navigate("/login")
     }
   }
 
-  const d = isDark
-
-  const navLink = `text-sm font-medium transition-colors ${d ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-black"}`
-  const activeNavLink = `text-sm font-medium ${d ? "text-white" : "text-black"}`
-
   const isActive = (path: string) => location.pathname === path
 
   return (
-    <nav
-      style={{ fontFamily: "'Inter', ui-sans-serif, sans-serif" }}
-      className={`w-full sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between transition-all duration-300 ${
-        scrolled
-          ? d
-            ? "bg-black/90 backdrop-blur-xl border-b border-purple-500/20 shadow-lg shadow-purple-500/5"
-            : "bg-white/90 backdrop-blur-xl border-b border-purple-500/15 shadow-lg shadow-purple-500/5"
-          : d
-            ? "bg-black/60 backdrop-blur-md border-b border-white/8"
-            : "bg-white/70 backdrop-blur-md border-b border-black/8"
-      }`}
-    >
-      {/* Logo */}
-      <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-        <div className="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-          <span className="text-purple-400 text-xs font-black">M</span>
+    <nav className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/70 backdrop-blur-xl">
+      <header className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        
+        {/* Brand */}
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
+            <div className="w-8 h-8 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center">
+              <span className="text-accent text-sm font-black">M</span>
+            </div>
+            <span className="font-black text-xl tracking-tight text-foreground">
+              Mantis
+            </span>
+          </Link>
         </div>
-        <span className={`font-black text-lg tracking-tight ${d ? "text-white" : "text-black"}`}>
-          Mantis
-        </span>
-      </Link>
 
-      {/* Center nav links */}
-      <div className="hidden sm:flex items-center gap-7">
-        <Link to="/" className={isActive("/") ? activeNavLink : navLink}>Home</Link>
-        <Link to="/products" className={isActive("/products") ? activeNavLink : navLink}>Products</Link>
-      </div>
-
-      {/* Right side */}
-      <div className="flex items-center gap-2">
-
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className={`w-9 h-9 rounded-xl border flex items-center justify-center transition text-base ${
-            d
-              ? "border-white/10 hover:border-white/25 text-gray-400 hover:text-white"
-              : "border-black/10 hover:border-black/25 text-gray-500 hover:text-black"
-          }`}
-          title="Toggle theme"
-        >
-          {d ? "☀️" : "🌙"}
-        </button>
-
-        {/* Cart — always visible, redirect to login if not logged in */}
-        <Link
-          to="/cart"
-          onClick={handleCartClick}
-          title="Cart"
-          className={`relative w-9 h-9 rounded-xl border flex items-center justify-center transition ${
-            d
-              ? "border-white/10 hover:border-white/25 text-gray-400 hover:text-white"
-              : "border-black/10 hover:border-black/25 text-gray-500 hover:text-black"
-          }`}
-        >
-          <CartIcon className="w-4 h-4" />
-          {/* Dot indicator only when logged in */}
-          {isLoggedIn && (
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full" />
-          )}
-        </Link>
-
-        {/* User section */}
-        {isLoggedIn ? (
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen(prev => !prev)}
-              className="w-9 h-9 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 text-sm font-black hover:bg-purple-500/30 hover:border-purple-400/60 transition-all duration-200"
-              title={userName ?? undefined}
+        {/* Center Links */}
+        <ul className="hidden sm:flex items-center gap-8">
+          <li className="relative h-16 flex items-center">
+            <Link 
+              to="/" 
+              className={`text-sm font-medium transition-colors ${isActive("/") ? "text-foreground" : "text-foreground/60 hover:text-foreground"}`}
             >
-              {getInitials(userName ?? "U")}
-            </button>
-
-            {dropdownOpen && (
-              <div className={`absolute right-0 mt-2 w-52 border rounded-2xl shadow-2xl overflow-hidden z-50 ${
-                d ? "bg-zinc-900 border-white/10 shadow-black/50" : "bg-white border-black/10 shadow-black/10"
-              }`}>
-                <div className={`px-4 py-3 border-b ${d ? "border-white/8" : "border-black/8"}`}>
-                  <p className={`text-xs ${d ? "text-gray-500" : "text-gray-400"}`}>Masuk sebagai</p>
-                  <p className={`text-sm font-bold truncate ${d ? "text-white" : "text-black"}`}>{userName}</p>
-                </div>
-                <div className="p-1">
-                  <Link
-                    to="/orders"
-                    onClick={() => setDropdownOpen(false)}
-                    className={`flex items-center gap-2 w-full px-3 py-2 text-sm rounded-xl transition ${
-                      d ? "text-gray-300 hover:bg-white/5 hover:text-white" : "text-gray-600 hover:bg-black/5 hover:text-black"
-                    }`}
-                  >
-                    <span>📦</span> Orders
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-500 rounded-xl transition"
-                  >
-                    <span>🚪</span> Logout
-                  </button>
-                </div>
-              </div>
+              Home
+            </Link>
+            {isActive("/") && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-[2px] bg-foreground" />
             )}
-          </div>
-        ) : (
-          /* Login + Register — side by side, compact */
-          <div className="flex items-center gap-2 ml-1">
-            <Link to="/login">
-              <button className={`px-4 py-2 text-sm font-medium rounded-xl border transition ${
-                d
-                  ? "text-gray-300 border-white/10 hover:border-white/25 hover:text-white"
-                  : "text-gray-600 border-black/10 hover:border-black/25 hover:text-black"
-              }`}>
-                Login
-              </button>
+          </li>
+          <li className="relative h-16 flex items-center">
+            <Link 
+              to="/products" 
+              className={`text-sm font-medium transition-colors ${isActive("/products") ? "text-foreground" : "text-foreground/60 hover:text-foreground"}`}
+            >
+              Products
             </Link>
-            <Link to="/register">
-              <button className={`px-4 py-2 text-sm font-bold rounded-xl transition ${
-                d ? "bg-white text-black hover:bg-gray-100" : "bg-black text-white hover:bg-zinc-800"
-              }`}>
-                Register
-              </button>
+            {isActive("/products") && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-[2px] bg-foreground" />
+            )}
+          </li>
+        </ul>
+
+        {/* Right Content */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Button isIconOnly variant="ghost" onPress={toggleTheme} className="text-foreground/70 h-10 w-10 border-transparent bg-transparent hover:bg-foreground/5">
+            <Moon size={20} className="block dark:hidden" />
+            <Sun size={20} className="hidden dark:block" />
+          </Button>
+          
+          <Link to="/cart" onClick={handleCartClick} className="block">
+            <Button isIconOnly variant="ghost" className="text-foreground/70 h-10 w-10 border-transparent bg-transparent hover:bg-foreground/5">
+              <ShoppingCart size={20} />
+            </Button>
+          </Link>
+
+          {isLoggedIn ? (
+            <Dropdown>
+              <Button 
+                isIconOnly
+                variant="secondary" 
+                className="w-10 h-10 rounded-full font-bold text-sm bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all ml-2"
+              >
+                {getInitials(userName ?? "U")}
+              </Button>
+              <Dropdown.Popover className="bg-background border border-border/50 shadow-xl shadow-black/5 dark:shadow-black/40 rounded-2xl min-w-48 p-1">
+                <Dropdown.Menu>
+                  <Dropdown.Item id="profile" textValue="Profile" className="h-14 gap-2 opacity-100 cursor-default pointer-events-none mb-1 px-3">
+                    <Label className="text-xs text-foreground/50 font-medium block">Masuk sebagai</Label>
+                    <Label className="text-sm font-bold truncate text-foreground block">{userName}</Label>
+                  </Dropdown.Item>
+                  <Dropdown.Item 
+                    id="orders" 
+                    href="/orders" 
+                    textValue="Orders"
+                    className="text-foreground/80 font-medium rounded-xl mb-1 px-3 flex items-center gap-2"
+                  >
+                    <Package size={16} className="text-foreground/60"/>
+                    <Label>Orders</Label>
+                  </Dropdown.Item>
+                  <Dropdown.Item 
+                    id="logout" 
+                    textValue="Logout"
+                    className="text-danger font-medium rounded-xl px-3 flex items-center gap-2 data-[hovered]:bg-danger/10" 
+                    onAction={handleLogout}
+                  >
+                    <LogOut size={16}/>
+                    <Label className="text-danger">Logout</Label>
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown.Popover>
+            </Dropdown>
+          ) : (
+            <Link to="/login" className="flex items-center ml-2">
+              <Button variant="outline" className="font-semibold text-foreground border-border/60 hover:border-foreground/40 hover:bg-foreground/5 hidden sm:flex h-10 px-5 rounded-xl transition-colors">
+                Get Started
+              </Button>
+              <Button isIconOnly variant="outline" className="text-foreground border-border/60 hover:bg-foreground/5 sm:hidden h-10 w-10 rounded-xl">
+                <UserIcon size={18} />
+              </Button>
             </Link>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+
+      </header>
     </nav>
   )
 }

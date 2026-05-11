@@ -1,6 +1,8 @@
 import { Link, redirect } from "react-router"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { OrderCardSkeleton } from "../components/Skeleton"
+import { useTheme } from "../hooks/useTheme"
+import { Surface } from "../components/Surface"
 
 export const loader = async () => {
   const authStatus = typeof window !== "undefined"
@@ -13,18 +15,6 @@ export const loader = async () => {
   return null;
 };
 
-function useTheme() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === "undefined") return true
-    return (localStorage.getItem("theme") || "dark") === "dark"
-  })
-  useEffect(() => {
-    const handler = () => setIsDark((localStorage.getItem("theme") || "dark") === "dark")
-    window.addEventListener("themechange", handler)
-    return () => window.removeEventListener("themechange", handler)
-  }, [])
-  return isDark
-}
 
 interface OrderItem {
   id: number;
@@ -82,30 +72,29 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 
 export default function Orders() {
-  const isDark = useTheme()
-  const d = isDark
+  const { isDark } = useTheme()
   const [loading] = useState(false)
 
   if (loading) return (
-    <div className={`min-h-screen px-6 py-10 font-sans transition-colors duration-300 ${d ? "bg-black text-white" : "bg-gray-50 text-black"}`}>
+    <div className="min-h-screen px-6 py-10 font-sans bg-gray-50 text-black dark:bg-black dark:text-white">
       <div className="max-w-4xl mx-auto">
-        <div className={`h-8 rounded-lg w-48 mb-2 animate-pulse ${d ? "bg-white/8" : "bg-black/8"}`} />
-        <div className={`h-4 rounded-lg w-24 mb-8 animate-pulse ${d ? "bg-white/5" : "bg-black/5"}`} />
+        <div className="h-8 rounded-lg w-48 mb-2 animate-pulse bg-black/8 dark:bg-white/8" />
+        <div className="h-4 rounded-lg w-24 mb-8 animate-pulse bg-black/5 dark:bg-white/5" />
         <div className="flex flex-col gap-5">
-          {[...Array(3)].map((_, i) => <OrderCardSkeleton key={i} isDark={d} />)}
+          {[...Array(3)].map((_, i) => <OrderCardSkeleton key={i} />)}
         </div>
       </div>
     </div>
   )
 
   return (
-    <div className={`min-h-screen px-6 py-10 font-sans transition-colors duration-300 ${d ? "bg-black text-white" : "bg-gray-50 text-black"}`}>
+    <div className="min-h-screen px-6 py-10 font-sans bg-gray-50 text-black dark:bg-black dark:text-white">
       <div className="max-w-4xl mx-auto">
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className={`text-3xl font-bold tracking-tight ${d ? "text-white" : "text-black"}`}>My Orders</h1>
-          <p className={`text-sm mt-1 ${d ? "text-gray-500" : "text-gray-400"}`}>
+          <h1 className="text-3xl font-bold tracking-tight text-black dark:text-white">My Orders</h1>
+          <p className="text-sm mt-1 text-gray-400 dark:text-gray-500">
             <span className="text-purple-400">{dummyOrders.length}</span> orders ditemukan
           </p>
         </div>
@@ -115,10 +104,10 @@ export default function Orders() {
             <div className="w-20 h-20 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-4xl mb-6">
               📦
             </div>
-            <h2 className={`text-xl font-semibold mb-2 ${d ? "text-white" : "text-black"}`}>Belum ada order!</h2>
-            <p className={`text-sm mb-6 ${d ? "text-gray-500" : "text-gray-400"}`}>Yuk mulai belanja</p>
+            <h2 className="text-xl font-semibold mb-2 text-black dark:text-white">Belum ada order!</h2>
+            <p className="text-sm mb-6 text-gray-400 dark:text-gray-500">Yuk mulai belanja</p>
             <Link to="/products">
-              <button className={`px-6 py-3 font-semibold rounded-xl transition text-sm ${d ? "bg-white text-black hover:bg-gray-100" : "bg-black text-white hover:bg-zinc-800"}`}>
+              <button className="px-6 py-3 font-semibold rounded-xl transition text-sm bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-gray-100">
                 Shop Now
               </button>
             </Link>
@@ -130,31 +119,29 @@ export default function Orders() {
               return (
                 <div
                   key={order.id}
-                  className={`border rounded-2xl p-6 hover:border-purple-500/20 hover:shadow-md hover:shadow-purple-500/5 transition-all duration-200 ${
-                    d ? "bg-white/4 border-white/8" : "bg-white border-black/8"
-                  }`}
+                  className="border rounded-2xl p-6 hover:border-purple-500/20 hover:shadow-md hover:shadow-purple-500/5 transition-all duration-200 bg-white border-black/8 dark:bg-white/4 dark:border-white/8"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <p className={`text-xs mb-1 ${d ? "text-gray-500" : "text-gray-400"}`}>{order.created_at.slice(0, 10)}</p>
-                      <h3 className={`text-base font-semibold ${d ? "text-white" : "text-black"}`}>{order.invoice_number}</h3>
+                      <p className="text-xs mb-1 text-gray-400 dark:text-gray-500">{order.created_at.slice(0, 10)}</p>
+                      <h3 className="text-base font-semibold text-black dark:text-white">{order.invoice_number}</h3>
                     </div>
                     <span className={`text-xs px-3 py-1 rounded-full border font-medium ${status.color}`}>
                       {status.label}
                     </span>
                   </div>
 
-                  <div className={`flex flex-col gap-2 mb-4 rounded-xl p-3 ${d ? "bg-white/2" : "bg-black/2"}`}>
+                  <Surface variant="secondary" className="flex flex-col gap-2 mb-4 rounded-xl p-3">
                     {order.items.map(item => (
                       <div key={item.id} className="flex justify-between text-sm">
-                        <span className={d ? "text-gray-400" : "text-gray-500"}>{item.product_name} x{item.quantity}</span>
-                        <span className={d ? "text-white" : "text-black"}>Rp {item.price_at_purchase.toLocaleString("id-ID")}</span>
+                        <span className="text-gray-500 dark:text-gray-400">{item.product_name} x{item.quantity}</span>
+                        <span className="text-black dark:text-white">Rp {item.price_at_purchase.toLocaleString("id-ID")}</span>
                       </div>
                     ))}
-                  </div>
+                  </Surface>
 
-                  <div className={`border-t pt-4 flex items-center justify-between ${d ? "border-white/8" : "border-black/8"}`}>
-                    <div className={`text-sm ${d ? "text-gray-500" : "text-gray-400"}`}>
+                  <div className="border-t pt-4 flex items-center justify-between border-black/8 dark:border-white/8">
+                    <div className="text-sm text-gray-400 dark:text-gray-500">
                       {order.courier_name && (
                         <span className="flex items-center gap-1">
                           🚚 {order.courier_name}
@@ -165,7 +152,7 @@ export default function Orders() {
                       )}
                     </div>
                     <div className="text-right">
-                      <p className={`text-xs mb-1 ${d ? "text-gray-500" : "text-gray-400"}`}>Total</p>
+                      <p className="text-xs mb-1 text-gray-400 dark:text-gray-500">Total</p>
                       <p className="text-base font-bold text-purple-400">
                         Rp {order.grand_total.toLocaleString("id-ID")}
                       </p>
