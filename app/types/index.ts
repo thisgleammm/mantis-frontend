@@ -1,3 +1,9 @@
+export interface ProductImage {
+  id: number;
+  image_url: string;
+  sort_order: number;
+}
+
 export interface Product {
   id: number;
   category_id: number;
@@ -11,6 +17,7 @@ export interface Product {
   rating_average: number;
   rating_count: number;
   created_at: string;
+  images?: ProductImage[];
   variants?: Variant[];
   reviews?: Review[];
   category?: string;
@@ -19,8 +26,11 @@ export interface Product {
 
 
 export interface Variant {
-  id: string | number;
+  id: number;
   variant_name: string;
+  price_extra: number;
+  stock: number;
+  stock_keeping_unit: string;
 }
 
 export interface Review {
