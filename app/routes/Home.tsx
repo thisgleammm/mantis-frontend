@@ -3,6 +3,8 @@ import { useState, useEffect } from "react"
 import { useTheme } from "../hooks/useTheme"
 import { getAllProducts } from "../services/productService"
 import type { Product } from "../types"
+import {Flame} from "lucide-react";
+import {Chip} from "@heroui/react";
 
 const categories = [
   { name: "T-Shirt", icon: "👕" },
@@ -38,6 +40,7 @@ export default function Home() {
   const { isDark } = useTheme()
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [flashProducts, setFlashProducts] = useState<Product[]>([])
+  const [heroProduct, setHeroProduct] = useState<Product | null>(null)
   const [activeTab, setActiveTab] = useState("Best Seller")
 
   const flashEnd = new Date(Date.now() + 6 * 3600000)
@@ -48,6 +51,8 @@ export default function Home() {
       .then(data => {
         setFeaturedProducts(data.slice(0, 8))
         setFlashProducts(data.slice(0, 5))
+        const mac = data.find(p => p.name.toLowerCase().includes("macbook"))
+        if (mac) setHeroProduct(mac)
       })
       .catch(err => console.error(err))
   }, [])
@@ -65,9 +70,10 @@ export default function Home() {
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-purple-500/5 via-transparent to-gray-100 dark:from-white/3 dark:via-transparent dark:to-purple-500/5" />
         <div className="max-w-6xl mx-auto px-6 py-20 flex flex-col lg:flex-row items-center gap-12">
           <div className="flex-1 z-10">
-            <span className="text-xs text-purple-400 bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full tracking-widest uppercase">
-              🔥 Limited Time Offer
-            </span>
+            <Chip color="accent" variant="soft" >
+              <Flame color="#ff0000" size={14} />
+              <Chip.Label>LIMITED TIME OFFER</Chip.Label>
+            </Chip>
             <h1 className="mt-5 mb-3 leading-none" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
               <span className="block text-6xl font-bold tracking-tight text-black dark:text-white ">Up to</span>
               <span className="block text-7xl font-black tracking-tight" style={{ WebkitTextStroke: "2px #a855f7", color: "transparent" }}>50% OFF</span>
@@ -79,7 +85,7 @@ export default function Home() {
             <div className="flex gap-3">
               <Link to="/products">
                 <button className="px-7 py-3 font-bold rounded-2xl transition text-sm tracking-wide shadow-lg bg-black text-white hover:bg-zinc-800 shadow-black/10 dark:bg-white dark:text-black dark:hover:bg-gray-100 dark:shadow-white/10">
-                  Shop Now →
+                  Shop Now
                 </button>
               </Link>
               <Link to="/products">
@@ -91,19 +97,27 @@ export default function Home() {
           </div>
 
           <div className="flex-1 flex items-center justify-center z-10">
-            <div className="relative w-80 h-72">
-              <div className="absolute inset-0 border rounded-3xl flex items-center justify-center text-8xl shadow-2xl bg-black/4 border-black/10 dark:bg-white/4 dark:border-white/10">
-                🛍️
+            <Link to={heroProduct ? `/products/${heroProduct.slug}` : "/products"} className="relative w-80 h-72 block transition-transform hover:scale-[1.02]">
+              <div className="absolute inset-0 border rounded-3xl overflow-hidden flex items-center justify-center text-8xl shadow-2xl bg-black/4 border-black/10 dark:bg-white/4 dark:border-white/10">
+                {heroProduct?.images?.[0] ? (
+                  <img src={heroProduct.images[0].image_url} alt={heroProduct.name} className="w-full h-full object-cover" />
+                ) : (
+                  "🛍️"
+                )}
               </div>
-              <div className="absolute -top-4 -right-4 text-xs font-black px-4 py-2 rounded-2xl shadow-lg bg-black text-white dark:bg-white dark:text-black">
-                50% OFF
-              </div>
+              {heroProduct?.discount_price && heroProduct.discount_price < heroProduct.base_price && (
+                <div className="absolute -top-4 -right-4 text-xs font-black px-4 py-2 rounded-2xl shadow-lg bg-black text-white dark:bg-white dark:text-black">
+                  {Math.round(((heroProduct.base_price - heroProduct.discount_price) / heroProduct.base_price) * 100)}% OFF
+                </div>
+              )}
               <div className="absolute -bottom-4 -left-4 border backdrop-blur rounded-2xl px-4 py-3 text-xs shadow-lg bg-black/5 border-black/10 dark:bg-white/8 dark:border-white/15">
-                <p className="text-[10px] uppercase tracking-widest mb-1 text-gray-500 dark:text-gray-400">Best Seller</p>
-                <p className="font-bold text-black dark:text-white">Macbook Pro M5</p>
-                <p className="text-[11px] text-gray-500 dark:text-gray-300">Rp 35.000.000</p>
+                <p className="text-[10px] uppercase tracking-widest mb-1 text-gray-500">Best Seller</p>
+                <p className="font-bold text-black">{heroProduct?.name || "Macbook Pro M5"}</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-100">
+                  Rp {(heroProduct?.discount_price || heroProduct?.base_price || 35000000).toLocaleString("id-ID")}
+                </p>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
 
@@ -146,7 +160,7 @@ export default function Home() {
               </div>
             </div>
             <Link to="/products" className="text-sm transition font-medium text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white">
-              View All →
+              View All
             </Link>
           </div>
 
@@ -188,8 +202,8 @@ export default function Home() {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition tracking-wide ${activeTab === tab
-                      ? "bg-black text-white shadow-lg shadow-black/10 dark:bg-white dark:text-black dark:shadow-white/10"
-                      : "border border-black/10 text-gray-400 hover:border-black/25 hover:text-black dark:border-white/10 dark:text-gray-500 dark:hover:border-white/25 dark:hover:text-white"
+                    ? "bg-black text-white shadow-lg shadow-black/10 dark:bg-white dark:text-black dark:shadow-white/10"
+                    : "border border-black/10 text-gray-400 hover:border-black/25 hover:text-black dark:border-white/10 dark:text-gray-500 dark:hover:border-white/25 dark:hover:text-white"
                     }`}
                 >
                   {tab}
@@ -252,7 +266,7 @@ export default function Home() {
             </p>
             <Link to="/register" className="z-10">
               <button className="px-8 py-3 font-bold rounded-2xl transition text-sm tracking-wide shadow-lg bg-black text-white hover:bg-zinc-800 shadow-black/10 dark:bg-white dark:text-black dark:hover:bg-gray-100 dark:shadow-white/10">
-                Daftar Sekarang →
+                Daftar Sekarang
               </button>
             </Link>
           </div>
