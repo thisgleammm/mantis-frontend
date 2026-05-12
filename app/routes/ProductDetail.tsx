@@ -3,7 +3,7 @@ import { Star } from "lucide-react";
 import { useProduct } from "../hooks/queries";
 import { getCart, getCartItems, addToCart, updateCartItem } from "../services/cartService";
 import { ProductDetailSkeleton } from "../components/Skeleton";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../hooks/ThemeContext";
 import { Surface } from "../components/Surface";
 import { Button } from "@heroui/react";
 

@@ -8,7 +8,7 @@ import { Button } from '@heroui/react';
 import Alert from "../components/Alert";
 import { z } from "zod";
 import { register } from "../services/authService";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../hooks/ThemeContext";
 import { User, Mail, Lock, Phone, UserCircle, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
@@ -114,7 +114,7 @@ export default function Register() {
                                 <div className="relative">
                                     <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                                     <Input
-                                        placeholder="email@example.com"
+                                        placeholder="email@gmail.com"
                                         className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border border-border bg-field-background text-field-foreground placeholder:text-field-placeholder outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors"
                                     />
                                 </div>

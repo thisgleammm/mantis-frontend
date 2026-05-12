@@ -6,11 +6,12 @@ import {
     Spinner,
 } from "@heroui/react";
 import { login } from "../services/authService";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../hooks/ThemeContext";
 import { Button } from "@heroui/react";
 import Alert from "../components/Alert";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { useState } from "react";
+import { z } from "zod";
 
 const loginSchema = z.object({
     email: z.string().min(1, "Email harus diisi").email("Format email tidak valid"),
@@ -86,7 +87,7 @@ export default function Login() {
                                 <div className="relative">
                                     <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                                     <Input
-                                        placeholder="email@example.com"
+                                        placeholder="email@gmail.com"
                                         className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border border-border bg-field-background text-field-foreground placeholder:text-field-placeholder outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors"
                                     />
                                 </div>
@@ -96,6 +97,9 @@ export default function Login() {
                             <TextField name="password" type={showPass ? "text" : "password"} isRequired className="flex flex-col gap-1.5">
                                 <div className="flex items-center justify-between">
                                     <Label className="text-sm font-medium text-foreground">Password</Label>
+                                    <Link to="/forgot-password" size="sm" className="text-xs text-accent hover:underline">
+                                        Lupa password?
+                                    </Link>
                                 </div>
                                 <div className="relative">
                                     <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />

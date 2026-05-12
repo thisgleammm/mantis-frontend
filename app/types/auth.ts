@@ -22,3 +22,7 @@ export interface RegisterResponse {
 export interface LogoutResponse {
   message: string;
 }
+
+export interface GenericResponse {
+  message: string;
+}

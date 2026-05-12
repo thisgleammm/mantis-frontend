@@ -9,5 +9,6 @@ export default [
   route("orders", "routes/Orders.tsx"),
   route("login", "routes/Login.tsx"),
   route("register", "routes/Register.tsx"),
-
+  route("forgot-password", "routes/ForgotPassword.tsx"),
+  route("reset-password", "routes/ResetPassword.tsx"),
 ] satisfies RouteConfig;

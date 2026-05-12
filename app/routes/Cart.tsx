@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../hooks/ThemeContext";
 import { Surface } from "../components/Surface";
 import { Button } from '@heroui/react';
 import type { CartItemResponse } from "../types/cart";
@@ -25,8 +26,13 @@ export default function Cart() {
   const updateMutation = useUpdateCartItemMutation();
   const removeMutation = useRemoveCartItemMutation();
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn, navigate]);
+
   if (!isLoggedIn) {
-    navigate("/login");
     return null;
   }
 

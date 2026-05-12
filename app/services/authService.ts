@@ -1,5 +1,5 @@
 import { apiFetch } from "./apiClient";
-import type { LoginResponse, RegisterResponse, UserResponse, LogoutResponse } from "../types/auth";
+import type { LoginResponse, RegisterResponse, UserResponse, LogoutResponse, GenericResponse } from "../types/auth";
 
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
   return apiFetch<LoginResponse>("/auth/login", {
@@ -33,4 +33,25 @@ export const register = async (
 
 export const getCurrentUser = async (): Promise<UserResponse> => {
   return apiFetch<UserResponse>("/users/me");
+};
+
+export const forgotPassword = async (email: string): Promise<GenericResponse> => {
+  return apiFetch<GenericResponse>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+};
+
+export const resetPassword = async (token: string, password: string): Promise<GenericResponse> => {
+  return apiFetch<GenericResponse>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password }),
+  });
+};
+
+export const confirmPassword = async (password: string): Promise<GenericResponse> => {
+  return apiFetch<GenericResponse>("/auth/confirm-password", {
+    method: "POST",
+    body: JSON.stringify({ password }),
+  });
 };

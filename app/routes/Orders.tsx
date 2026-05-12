@@ -1,7 +1,7 @@
 import { Link, redirect } from "react-router"
 import { useState } from "react"
 import { OrderCardSkeleton } from "../components/Skeleton"
-import { useTheme } from "../hooks/useTheme"
+import { useTheme } from "../hooks/ThemeContext"
 import { Surface } from "../components/Surface"
 
 export const loader = async () => {

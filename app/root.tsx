@@ -11,6 +11,7 @@ import "./global.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Layout";
 import QueryProvider from "./components/QueryProvider";
+import { ThemeProvider } from "./hooks/ThemeContext";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -28,7 +29,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              const theme = localStorage.getItem('theme') || 'dark';
+              const theme = localStorage.getItem('theme') || 'light';
               document.documentElement.classList.remove('dark', 'light');
               document.documentElement.classList.add(theme);
               document.documentElement.setAttribute('data-theme', theme);
@@ -48,9 +49,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <QueryProvider>
-      <Navbar />
-      <Outlet />
-      <Footer />
+      <ThemeProvider>
+        <Navbar />
+        <Outlet />
+        <Footer />
+      </ThemeProvider>
     </QueryProvider>
   );
 }

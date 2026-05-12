@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router"
-import { useTheme } from "../hooks/useTheme"
+import { useTheme } from "../hooks/ThemeContext"
 import { Button, Dropdown, Label, Header } from "@heroui/react"
 import { Sun, Moon, ShoppingCart, Package, LogOut, User as UserIcon } from "lucide-react"
 import { useCurrentUser } from "../hooks/queries"

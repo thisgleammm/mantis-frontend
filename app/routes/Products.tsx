@@ -6,6 +6,7 @@ import { ProductCardSkeleton } from "../components/Skeleton";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/Card";
 import { Chip } from "../components/Chip";
 import { Kbd } from "../components/Kbd";
+import { useTheme } from "../hooks/ThemeContext";
 
 export default function Products() {
   useTheme();
@@ -93,7 +94,7 @@ export default function Products() {
                     <img
                       src={[...product.images].sort((a, b) => a.sort_order - b.sort_order)[0].image_url}
                       alt={product.name}
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="h-full w-full object-cover"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-4xl">🛍️</div>
