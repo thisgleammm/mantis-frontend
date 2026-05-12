@@ -82,7 +82,7 @@ export default function ForgotPassword() {
                                     <FieldError className="text-xs text-danger">{actionData?.fieldErrors?.email}</FieldError>
                                 </TextField>
 
-                                <Button type="submit" isPending={loading} className="w-full mt-1">
+                                <Button type="submit" variant="primary" isPending={loading} fullWidth className="mt-1">
                                     Kirim Link Reset
                                 </Button>
                             </Form>

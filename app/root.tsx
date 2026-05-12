@@ -29,7 +29,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              const theme = localStorage.getItem('theme') || 'light';
+              const savedTheme = localStorage.getItem('theme');
+              let theme = 'light';
+              if (savedTheme) {
+                theme = savedTheme;
+              } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                theme = 'dark';
+              }
               document.documentElement.classList.remove('dark', 'light');
               document.documentElement.classList.add(theme);
               document.documentElement.setAttribute('data-theme', theme);

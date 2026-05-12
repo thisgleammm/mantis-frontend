@@ -97,7 +97,7 @@ export default function Login() {
                             <TextField name="password" type={showPass ? "text" : "password"} isRequired className="flex flex-col gap-1.5">
                                 <div className="flex items-center justify-between">
                                     <Label className="text-sm font-medium text-foreground">Password</Label>
-                                    <Link to="/forgot-password" size="sm" className="text-xs text-accent hover:underline">
+                                    <Link to="/forgot-password" className="text-xs text-accent hover:underline">
                                         Lupa password?
                                     </Link>
                                 </div>
@@ -118,7 +118,7 @@ export default function Login() {
                                 <FieldError className="text-xs text-danger">{actionData?.fieldErrors?.password}</FieldError>
                             </TextField>
 
-                            <Button type="submit" isPending={loading} className="w-full mt-1">
+                            <Button type="submit" variant="primary" isPending={loading} fullWidth className="mt-1">
                                 Login
                             </Button>
                         </Form>

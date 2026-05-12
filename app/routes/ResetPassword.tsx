@@ -64,9 +64,11 @@ export default function ResetPassword() {
                         </div>
                         <h1 className="text-2xl font-bold text-foreground">Password Berhasil Diubah</h1>
                         <p className="text-sm text-muted-foreground">Silakan login kembali dengan password baru kamu.</p>
-                        <Button as={Link} to="/login" className="w-full mt-4">
-                            Kembali ke Login
-                        </Button>
+                        <Link to="/login" replace className="w-full mt-4 block">
+                            <Button variant="primary" fullWidth>
+                                Kembali ke Login
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -132,7 +134,7 @@ export default function ResetPassword() {
                                     <FieldError className="text-xs text-danger">{actionData?.fieldErrors?.confirmPassword}</FieldError>
                                 </TextField>
 
-                                <Button type="submit" isPending={loading} className="w-full mt-1">
+                                <Button type="submit" variant="primary" isPending={loading} fullWidth className="mt-1">
                                     Reset Password
                                 </Button>
                             </Form>

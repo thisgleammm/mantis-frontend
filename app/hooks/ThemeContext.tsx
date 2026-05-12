@@ -16,8 +16,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
  * Defaults to 'light' mode and persists preference to localStorage.
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Initialize with 'light' as requested. 
-  // We'll sync with localStorage in a useEffect to avoid hydration mismatches.
   const [theme, setThemeState] = useState<Theme>("light");
 
   const applyThemeToDocument = useCallback((t: Theme) => {
@@ -32,7 +30,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(newTheme);
     localStorage.setItem("theme", newTheme);
     applyThemeToDocument(newTheme);
-    // Notify other components/hooks that theme has changed
     window.dispatchEvent(new Event("themechange"));
   }, [applyThemeToDocument]);
 
@@ -40,16 +37,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(theme === "light" ? "dark" : "light");
   }, [theme, setTheme]);
 
-  // Initial sync with localStorage on mount
+  // Initial sync with localStorage or system preference on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const initialTheme = savedTheme || "light";
-    
-    if (initialTheme !== theme) {
-      setThemeState(initialTheme);
+    let initialTheme: Theme = "light";
+
+    if (savedTheme) {
+      initialTheme = savedTheme;
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      initialTheme = "dark";
     }
+
+    setThemeState(initialTheme);
     applyThemeToDocument(initialTheme);
-  }, []);
+  }, [applyThemeToDocument]);
 
   // Synchronize theme across different tabs and instances
   useEffect(() => {
