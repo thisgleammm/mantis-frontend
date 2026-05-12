@@ -1,11 +1,16 @@
 import { Link, Form, redirect, useNavigation, useActionData } from "react-router";
-import { TextField, Label, Input, FieldError } from "@heroui/react";
-import { z } from "zod";
+import {
+    Card, CardContent,
+    TextField, Label, Input, FieldError,
+    Separator,
+    Spinner,
+} from "@heroui/react";
 import { login } from "../services/authService";
 import { useTheme } from "../hooks/useTheme";
 import { Button } from "@heroui/react";
 import Alert from "../components/Alert";
-import { Surface } from "../components/Surface";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { useState } from "react";
 
 const loginSchema = z.object({
     email: z.string().min(1, "Email harus diisi").email("Format email tidak valid"),
@@ -30,7 +35,6 @@ export async function clientAction({ request }: { request: Request }) {
 
     try {
         const data = await login(email, password);
-
         if (data.token || data.message === "logged in successfully") {
             localStorage.setItem("is_logged_in", "true");
             document.cookie = "is_logged_in=true; path=/; max-age=31536000"; // 1 year
@@ -42,93 +46,91 @@ export async function clientAction({ request }: { request: Request }) {
         } else if (data.message === "email tidak terdaftar") {
             return redirect(`/register?email=${encodeURIComponent(email)}`);
         } else {
-            return { error: data.message || "Email atau password yang Anda masukkan tidak terdaftar." };
+            return { error: data.message || "Email atau password salah." };
         }
     } catch (err: any) {
-        return { error: err.message || "Gagal terhubung ke server. Pastikan koneksi internet Anda stabil." };
+        return { error: err.message || "Gagal terhubung ke server." };
     }
 }
-
 
 export default function Login() {
     const actionData = useActionData<typeof clientAction>();
     const navigation = useNavigation();
     const loading = navigation.state === "submitting";
-    useTheme()
-
-    const inputClass = "w-full px-4 py-3 rounded-xl border text-sm outline-none transition bg-white border-black/10 text-black placeholder-gray-400 focus:border-purple-500/40 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder-gray-600 dark:focus:border-purple-500/40 dark:focus:bg-purple-500/5"
+    const [showPass, setShowPass] = useState(false);
+    useTheme();
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-6 bg-gray-50 text-black dark:bg-black dark:text-white">
-            <div className="w-full max-w-md">
+        <div className="min-h-screen flex items-center justify-center px-4 bg-background">
+            <div className="w-full max-w-sm">
 
-                <div className="text-center mb-10">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center mx-auto mb-4">
-                        <span className="text-purple-400 text-xl font-black">M</span>
+                {/* Brand */}
+                <div className="flex flex-col items-center mb-8">
+                    <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center mb-4">
+                        <span className="text-white font-black text-base">M</span>
                     </div>
-                    <h1 className="text-3xl font-bold mb-2 text-black dark:text-white">Sign In</h1>
+                    <h1 className="text-2xl font-bold text-foreground">Selamat datang</h1>
+                    <p className="text-sm text-muted-foreground mt-1">Masuk ke akun Mantis kamu</p>
                 </div>
 
-                <Surface 
-                    variant="default" 
-                    className="border rounded-2xl p-8 backdrop-blur border-black/8 shadow-sm dark:border-white/8 dark:shadow-none"
-                >
+                <Card className="border border-border shadow-sm bg-surface">
+                    <CardContent className="p-6 flex flex-col gap-5">
 
-                    {actionData?.error && (
-                        <Alert 
-                            status="danger" 
-                            description={actionData.error} 
-                            className="mb-6"
-                        />
-                    )}
+                        {actionData?.error && (
+                            <Alert status="danger" description={actionData.error} />
+                        )}
 
-                    <Form method="post" className="flex flex-col gap-4">
-                        <TextField 
-                            name="email" 
-                            type="email" 
-                            isRequired
-                            isInvalid={!!actionData?.fieldErrors?.email}
-                            className="flex flex-col gap-1"
-                        >
-                            <Label className="text-xs block text-gray-500 dark:text-gray-400">Email</Label>
-                            <Input
-                                placeholder="email@example.com"
-                                className={inputClass}
-                            />
-                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.fieldErrors?.email}</FieldError>
-                        </TextField>
+                        <Form method="post" className="flex flex-col gap-4">
+                            <TextField name="email" type="email" isRequired isInvalid={!!actionData?.fieldErrors?.email}  className="flex flex-col gap-1.5">
+                                <Label className="text-sm font-medium text-foreground">Email</Label>
+                                <div className="relative">
+                                    <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                                    <Input
+                                        placeholder="email@example.com"
+                                        className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border border-border bg-field-background text-field-foreground placeholder:text-field-placeholder outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors"
+                                    />
+                                </div>
+                                <FieldError className="text-xs text-danger">{actionData?.fieldErrors?.email}</FieldError>
+                            </TextField>
 
-                        <TextField 
-                            name="password" 
-                            type="password" 
-                            isRequired
-                            isInvalid={!!actionData?.fieldErrors?.password}
-                            className="flex flex-col gap-1"
-                        >
-                            <Label className="text-xs block text-gray-500 dark:text-gray-400">Password</Label>
-                            <Input
-                                placeholder="••••••••"
-                                className={inputClass}
-                            />
-                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.fieldErrors?.password}</FieldError>
-                        </TextField>  
-                        
-                        <Button
-                            type="submit"
-                            isPending={loading}
-                            className="w-full mt-2"
-                        >
-                            Login
-                        </Button>
-                    </Form>
+                            <TextField name="password" type={showPass ? "text" : "password"} isRequired className="flex flex-col gap-1.5">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-sm font-medium text-foreground">Password</Label>
+                                </div>
+                                <div className="relative">
+                                    <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                                    <Input
+                                        placeholder="••••••••"
+                                        className="w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border border-border bg-field-background text-field-foreground placeholder:text-field-placeholder outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPass(v => !v)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                                    </button>
+                                </div>
+                                <FieldError className="text-xs text-danger">{actionData?.fieldErrors?.password}</FieldError>
+                            </TextField>
 
-                    <p className="text-center text-sm mt-6 text-gray-400 dark:text-gray-500">
-                        Belum punya akun?{" "}
-                        <Link to="/register" className="font-semibold hover:underline text-black dark:text-white">
-                            Register
-                        </Link>
-                    </p>
-                </Surface>
+                            <Button type="submit" isPending={loading} className="w-full mt-1">
+                                Login
+                            </Button>
+                        </Form>
+
+                        <Separator />
+
+                        <p className="text-center text-sm text-muted-foreground">
+                            Belum punya akun?{" "}
+                            <Link to="/register" className="font-semibold text-accent hover:underline">
+                                Daftar sekarang
+                            </Link>
+                        </p>
+
+                    </CardContent>
+                </Card>
+
             </div>
         </div>
     );

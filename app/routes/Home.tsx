@@ -1,10 +1,11 @@
 import { Link } from "react-router"
 import { useState, useEffect } from "react"
 import { useTheme } from "../hooks/useTheme"
+import { useInView } from "../hooks/useInView"
 import { getAllProducts } from "../services/productService"
 import type { Product } from "../types"
-import {Flame} from "lucide-react";
-import {Chip} from "@heroui/react";
+import { Flame } from "lucide-react"
+import { Chip } from "@heroui/react"
 
 const categories = [
   { name: "T-Shirt", icon: "👕" },
@@ -35,7 +36,6 @@ function useCountdown(target: Date) {
   return time
 }
 
-
 export default function Home() {
   const { isDark } = useTheme()
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
@@ -45,6 +45,15 @@ export default function Home() {
 
   const flashEnd = new Date(Date.now() + 6 * 3600000)
   const { h, m, s } = useCountdown(flashEnd)
+
+  const secHero = useInView<HTMLElement>(0.1)
+  const secCats = useInView<HTMLElement>(0.1)
+  const secFlash = useInView<HTMLElement>(0.1)
+  const secFeatured = useInView<HTMLElement>(0.1)
+  const secCta = useInView<HTMLElement>(0.1)
+
+  const fade = (v: boolean) =>
+    `transition-all duration-700 ${v ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`
 
   useEffect(() => {
     getAllProducts()
@@ -66,16 +75,16 @@ export default function Home() {
       style={{ fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif" }}
     >
 
-      <section className="relative overflow-hidden border-b border-black/8 dark:border-white/8">
+      <section ref={secHero.ref} className={`relative overflow-hidden border-b border-black/8 dark:border-white/8 ${fade(secHero.visible)}`}>
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-purple-500/5 via-transparent to-gray-100 dark:from-white/3 dark:via-transparent dark:to-purple-500/5" />
         <div className="max-w-6xl mx-auto px-6 py-20 flex flex-col lg:flex-row items-center gap-12">
           <div className="flex-1 z-10">
-            <Chip color="accent" variant="soft" >
+            <Chip color="accent" variant="soft">
               <Flame color="#ff0000" size={14} />
               LIMITED TIME OFFER
             </Chip>
             <h1 className="mt-5 mb-3 leading-none" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
-              <span className="block text-6xl font-bold tracking-tight text-black dark:text-white ">Up to</span>
+              <span className="block text-6xl font-bold tracking-tight text-black dark:text-white">Up to</span>
               <span className="block text-7xl font-black tracking-tight" style={{ WebkitTextStroke: "2px #a855f7", color: "transparent" }}>50% OFF</span>
             </h1>
             <p className="text-base mb-1 font-light tracking-wide text-gray-600 dark:text-gray-400">Premium Products, Minimal Aesthetic.</p>
@@ -112,7 +121,7 @@ export default function Home() {
               ) : null}
               <div className="absolute -bottom-4 -left-4 border backdrop-blur rounded-2xl px-4 py-3 text-xs shadow-lg bg-black/5 border-black/10 dark:bg-white/8 dark:border-white/15">
                 <p className="text-[10px] uppercase tracking-widest mb-1 text-gray-500">Best Seller</p>
-                <p className="font-bold text-black">{heroProduct?.name || "Macbook Pro M5"}</p>
+                <p className="font-bold text-black dark:text-white">{heroProduct?.name || "Macbook Pro M5"}</p>
                 <p className="text-[11px] text-gray-500 dark:text-gray-100">
                   Rp {(heroProduct?.discount_price || heroProduct?.base_price || 35000000).toLocaleString("id-ID")}
                 </p>
@@ -128,7 +137,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-b px-6 py-6 border-black/8 dark:border-white/8">
+      <section ref={secCats.ref} className={`border-b px-6 py-6 border-black/8 dark:border-white/8 ${fade(secCats.visible)}`}>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
             {categories.map(cat => (
@@ -145,7 +154,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 py-10 border-b border-black/8 dark:border-white/8">
+      <section ref={secFlash.ref} className={`px-6 py-10 border-b border-black/8 dark:border-white/8 ${fade(secFlash.visible)}`}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
@@ -192,7 +201,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 py-10 border-b border-black/8 dark:border-white/8">
+      <section ref={secFeatured.ref} className={`px-6 py-10 border-b border-black/8 dark:border-white/8 ${fade(secFeatured.visible)}`}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
             <h2 className="text-xl font-black tracking-tight">Todays For You!</h2>
@@ -251,7 +260,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 py-16">
+      <section ref={secCta.ref} className={`px-6 py-16 ${fade(secCta.visible)}`}>
         <div className="max-w-6xl mx-auto">
           <div className="relative border rounded-3xl p-12 flex flex-col items-center text-center overflow-hidden bg-white border-black/10 shadow-lg dark:bg-white/4 dark:border-white/10 dark:shadow-none">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent pointer-events-none" />
