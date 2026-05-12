@@ -18,12 +18,12 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
   const response = await fetch(`${BASE_URL}${endpoint}`, config);
 
   if (!response.ok) {
+    const text = await response.text();
     let errorMessage = `HTTP error! status: ${response.status}`;
     try {
-      const errorData = await response.json();
+      const errorData = JSON.parse(text);
       errorMessage = errorData.message || errorData.error || errorMessage;
     } catch {
-      const text = await response.text();
       if (text) errorMessage = text;
     }
     throw new Error(errorMessage);
