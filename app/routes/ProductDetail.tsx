@@ -1,35 +1,28 @@
 import { useParams, Link, useNavigate } from "react-router";
-import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
-import { getProductById } from "../services/productService";
+import { useProduct } from "../hooks/queries";
 import { getCart, getCartItems, addToCart, updateCartItem } from "../services/cartService";
 import { ProductDetailSkeleton } from "../components/Skeleton";
 import { useTheme } from "../hooks/useTheme";
 import { Surface } from "../components/Surface";
-import { Button } from "../components/Button";
-import type { Product } from "../types";
+import { Button } from "@heroui/react";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isDark } = useTheme();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  useTheme();
+  const { data: product, isLoading } = useProduct(id);
 
   const handleAddToCart = async () => {
     if (!product) return;
     try {
-      const cartData = await getCart();
-      const cart = Array.isArray(cartData) ? cartData[0] : cartData?.data?.[0];
+      const cart = await getCart();
       if (!cart?.id) {
         navigate("/login");
         return;
       }
-      const itemsData = await getCartItems(cart.id);
-      const items: any[] = Array.isArray(itemsData)
-        ? itemsData
-        : itemsData?.items ?? itemsData?.data ?? [];
-      const existingItem = items.find((i: any) => i.product_id === product.id);
+      const items = await getCartItems(cart.id);
+      const existingItem = items.find((i) => i.product_id === product.id);
 
       if (existingItem) {
         await updateCartItem(cart.id, existingItem.id, existingItem.quantity + 1);
@@ -42,19 +35,7 @@ export default function ProductDetail() {
     }
   };
 
-  useEffect(() => {
-    getProductById(id)
-      .then((data) => {
-        setProduct(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, [id]);
-
-  if (loading)
+  if (isLoading)
     return (
       <div className="min-h-screen px-6 py-10 font-sans bg-gray-50 text-black dark:bg-black dark:text-white">
         <ProductDetailSkeleton />

@@ -10,6 +10,7 @@ import {
 import "./global.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Layout";
+import QueryProvider from "./components/QueryProvider";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -46,11 +47,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <>
+    <QueryProvider>
       <Navbar />
       <Outlet />
       <Footer />
-    </>
+    </QueryProvider>
   );
 }
 

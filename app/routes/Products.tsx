@@ -1,21 +1,19 @@
 import { useNavigate } from "react-router";
 import { useState, useEffect, useRef } from "react";
 import { Star, Search, SearchX } from "lucide-react";
-import { getAllProducts } from "../services/productService";
+import { useProducts } from "../hooks/queries";
 import { ProductCardSkeleton } from "../components/Skeleton";
 import { useTheme } from "../hooks/useTheme";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/Card";
 import { Surface } from "../components/Surface";
 import { Chip } from "../components/Chip";
 import { Kbd } from "../components/Kbd";
-import type { Product } from "../types";
 
 export default function Products() {
-  const { isDark } = useTheme();
+  useTheme();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: products = [], isLoading } = useProducts();
   const [search, setSearch] = useState("");
   const [isMac, setIsMac] = useState(false);
 
@@ -34,30 +32,11 @@ export default function Products() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMac]);
 
-
-  useEffect(() => {
-    const fetchProducts = () => {
-      getAllProducts()
-        .then((data) => {
-          setProducts(data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error(err);
-          setLoading(false);
-        });
-    };
-
-    fetchProducts();
-    const interval = setInterval(fetchProducts, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
   const filtered = products.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase()),
   );
 
-  if (loading)
+  if (isLoading)
     return (
       <div className="min-h-screen px-6 py-10 font-sans bg-gray-50 text-black dark:bg-black dark:text-white">
         <div className="max-w-7xl mx-auto">
@@ -136,7 +115,7 @@ export default function Products() {
               <Card
                 key={product.id}
                 onClick={() => navigate(`/products/${product.slug}`)}
-                className="group border border-black/8 bg-white transition-all duration-300 dark:border-white/8 dark:bg-white/4 cursor-pointer"
+                className="group border border-black/8 bg-white dark:border-white/8 dark:bg-white/4 cursor-pointer hover:border-2 hover:border-purple-700"
               >
                 {/* Image Container */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden">

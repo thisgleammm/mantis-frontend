@@ -1,22 +1,38 @@
 import { Link, Form, redirect, useNavigation, useActionData, useSearchParams } from "react-router";
 import { TextField, Label, Input, FieldError } from "@heroui/react";
-import Button from "../components/Button";
+import { Button } from '@heroui/react';
 import Alert from "../components/Alert";
+import { z } from "zod";
 import { register } from "../services/authService";
 import { useTheme } from "../hooks/useTheme";
 import { Surface } from "../components/Surface";
 
+const registerSchema = z.object({
+    username: z.string().min(1, "Username harus diisi").min(3, "Username minimal 3 karakter"),
+    name: z.string().min(1, "Nama harus diisi"),
+    email: z.string().min(1, "Email harus diisi").email("Format email tidak valid"),
+    phone_number: z.string().min(1, "Nomor HP harus diisi").min(10, "Nomor HP minimal 10 digit"),
+    password: z.string().min(1, "Password harus diisi").min(8, "Password minimal 8 karakter"),
+});
+
 export async function clientAction({ request }: { request: Request }) {
     const formData = await request.formData();
-    const username = formData.get("username") as string;
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    const phone_number = formData.get("phone_number") as string;
-    const password = formData.get("password") as string;
+    const result = registerSchema.safeParse(Object.fromEntries(formData));
 
-    if (!username || !name || !email || !phone_number || !password) {
-        return { error: "Semua field harus diisi" };
+    if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors;
+        return {
+            fieldErrors: {
+                username: fieldErrors.username?.[0],
+                name: fieldErrors.name?.[0],
+                email: fieldErrors.email?.[0],
+                phone_number: fieldErrors.phone_number?.[0],
+                password: fieldErrors.password?.[0],
+            }
+        };
     }
+
+    const { username, name, email, password, phone_number } = result.data;
 
     try {
         const data = await register(username, name, email, password, phone_number);
@@ -26,8 +42,8 @@ export async function clientAction({ request }: { request: Request }) {
         } else {
             return { error: data.message || data.error || "Pendaftaran gagal. Pastikan data yang Anda masukkan benar." };
         }
-    } catch (err) {
-        return { error: "Gagal terhubung ke server. Pastikan koneksi internet Anda stabil." };
+    } catch (err: any) {
+        return { error: err.message || "Gagal terhubung ke server. Pastikan koneksi internet Anda stabil." };
     }
 }
 
@@ -72,7 +88,7 @@ export default function Register() {
                         <TextField 
                             name="username" 
                             isRequired
-                            isInvalid={!!actionData?.error && actionData.error.toLowerCase().includes("username")}
+                            isInvalid={!!actionData?.fieldErrors?.username}
                             className="flex flex-col gap-1"
                         >
                             <Label className="text-xs block text-gray-500 dark:text-gray-400">Username</Label>
@@ -80,13 +96,13 @@ export default function Register() {
                                 placeholder="username"
                                 className={inputClass}
                             />
-                            <FieldError className="text-[10px] text-red-500">{actionData?.error}</FieldError>
+                            <FieldError className="text-[10px] text-red-500">{actionData?.fieldErrors?.username}</FieldError>
                         </TextField>
 
                         <TextField 
                             name="name" 
                             isRequired
-                            isInvalid={!!actionData?.error && actionData.error.toLowerCase().includes("nama")}
+                            isInvalid={!!actionData?.fieldErrors?.name}
                             className="flex flex-col gap-1"
                         >
                             <Label className="text-xs block text-gray-500 dark:text-gray-400">Nama Lengkap</Label>
@@ -94,7 +110,7 @@ export default function Register() {
                                 placeholder="John Doe"
                                 className={inputClass}
                             />
-                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.error}</FieldError>
+                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.fieldErrors?.name}</FieldError>
                         </TextField>
 
                         <TextField 
@@ -102,7 +118,7 @@ export default function Register() {
                             type="email" 
                             defaultValue={emailParam}
                             isRequired
-                            isInvalid={!!actionData?.error && actionData.error.toLowerCase().includes("email")}
+                            isInvalid={!!actionData?.fieldErrors?.email}
                             className="flex flex-col gap-1"
                         >
                             <Label className="text-xs block text-gray-500 dark:text-gray-400">Email</Label>
@@ -110,13 +126,13 @@ export default function Register() {
                                 placeholder="email@example.com"
                                 className={inputClass}
                             />
-                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.error}</FieldError>
+                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.fieldErrors?.email}</FieldError>
                         </TextField>
 
                         <TextField 
                             name="phone_number" 
                             isRequired
-                            isInvalid={!!actionData?.error && (actionData.error.toLowerCase().includes("hp") || actionData.error.toLowerCase().includes("phone"))}
+                            isInvalid={!!actionData?.fieldErrors?.phone_number}
                             className="flex flex-col gap-1"
                         >
                             <Label className="text-xs block text-gray-500 dark:text-gray-400">No. HP</Label>
@@ -124,14 +140,14 @@ export default function Register() {
                                 placeholder="08xxxxxxxxxx"
                                 className={inputClass}
                             />
-                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.error}</FieldError>
+                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.fieldErrors?.phone_number}</FieldError>
                         </TextField>
 
                         <TextField 
                             name="password" 
                             type="password" 
                             isRequired
-                            isInvalid={!!actionData?.error && actionData.error.toLowerCase().includes("password")}
+                            isInvalid={!!actionData?.fieldErrors?.password}
                             className="flex flex-col gap-1"
                         >
                             <Label className="text-xs block text-gray-500 dark:text-gray-400">Password</Label>
@@ -139,12 +155,12 @@ export default function Register() {
                                 placeholder="••••••••"
                                 className={inputClass}
                             />
-                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.error}</FieldError>
+                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.fieldErrors?.password}</FieldError>
                         </TextField>
 
                         <Button
                             type="submit"
-                            loading={loading}
+                            isPending={loading}
                             className="w-full mt-2"
                         >
                             Register

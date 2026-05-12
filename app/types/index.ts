@@ -34,9 +34,9 @@ export interface Variant {
 }
 
 export interface Review {
-  id: string | number;
+  id: number;
   rating: number;
   comment: string;
   created_at?: string;
-  name?: string; // For the ReviewCard component if needed
+  name?: string;
 }
