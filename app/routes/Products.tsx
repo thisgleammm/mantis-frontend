@@ -11,7 +11,7 @@ import { Kbd } from "../components/Kbd";
 import type { Product } from "../types";
 
 export default function Products() {
-  const { isDark } = useTheme();
+  useTheme();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -49,8 +49,6 @@ export default function Products() {
     };
 
     fetchProducts();
-    const interval = setInterval(fetchProducts, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   const filtered = products.filter((p) =>
@@ -136,7 +134,7 @@ export default function Products() {
               <Card
                 key={product.id}
                 onClick={() => navigate(`/products/${product.slug}`)}
-                className="group border border-black/8 bg-white transition-all duration-300 dark:border-white/8 dark:bg-white/4 cursor-pointer"
+                className="group border border-black/8 bg-white dark:border-white/8 dark:bg-white/4 cursor-pointer hover:border-2 hover:border-purple-700"
               >
                 {/* Image Container */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden">

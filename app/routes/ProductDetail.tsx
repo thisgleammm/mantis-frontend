@@ -6,7 +6,7 @@ import { getCart, getCartItems, addToCart, updateCartItem } from "../services/ca
 import { ProductDetailSkeleton } from "../components/Skeleton";
 import { useTheme } from "../hooks/useTheme";
 import { Surface } from "../components/Surface";
-import { Button } from "../components/Button";
+import { Button } from "@heroui/react";
 import type { Product } from "../types";
 
 export default function ProductDetail() {
@@ -19,17 +19,13 @@ export default function ProductDetail() {
   const handleAddToCart = async () => {
     if (!product) return;
     try {
-      const cartData = await getCart();
-      const cart = Array.isArray(cartData) ? cartData[0] : cartData?.data?.[0];
+      const cart = await getCart();
       if (!cart?.id) {
         navigate("/login");
         return;
       }
-      const itemsData = await getCartItems(cart.id);
-      const items: any[] = Array.isArray(itemsData)
-        ? itemsData
-        : itemsData?.items ?? itemsData?.data ?? [];
-      const existingItem = items.find((i: any) => i.product_id === product.id);
+      const items = await getCartItems(cart.id);
+      const existingItem = items.find((i) => i.product_id === product.id);
 
       if (existingItem) {
         await updateCartItem(cart.id, existingItem.id, existingItem.quantity + 1);

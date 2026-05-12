@@ -1,37 +1,51 @@
 import { Link, Form, redirect, useNavigation, useActionData } from "react-router";
 import { TextField, Label, Input, FieldError } from "@heroui/react";
+import { z } from "zod";
 import { login } from "../services/authService";
 import { useTheme } from "../hooks/useTheme";
-import Button from "../components/Button";
+import { Button } from "@heroui/react";
 import Alert from "../components/Alert";
 import { Surface } from "../components/Surface";
 
+const loginSchema = z.object({
+    email: z.string().min(1, "Email harus diisi").email("Format email tidak valid"),
+    password: z.string().min(1, "Password harus diisi").min(8, "Password minimal 8 karakter"),
+});
+
 export async function clientAction({ request }: { request: Request }) {
     const formData = await request.formData();
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    const result = loginSchema.safeParse(Object.fromEntries(formData));
 
-    if (!email || !password) {
-        return { error: "Semua field harus diisi" };
+    if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors;
+        return { 
+            fieldErrors: {
+                email: fieldErrors.email?.[0],
+                password: fieldErrors.password?.[0],
+            }
+        };
     }
-    if (password.length < 8) {
-        return { error: "Password minimal 8 karakter" };
-    }
+
+    const { email, password } = result.data;
 
     try {
         const data = await login(email, password);
 
         if (data.token || data.message === "logged in successfully") {
             localStorage.setItem("is_logged_in", "true");
-            localStorage.setItem("token", data.token);
+            document.cookie = "is_logged_in=true; path=/; max-age=31536000"; // 1 year
+            if (data.token) {
+                localStorage.setItem("token", data.token);
+                document.cookie = `token=${data.token}; path=/; max-age=31536000`;
+            }
             return redirect("/");
         } else if (data.message === "email tidak terdaftar") {
             return redirect(`/register?email=${encodeURIComponent(email)}`);
         } else {
             return { error: data.message || "Email atau password yang Anda masukkan tidak terdaftar." };
         }
-    } catch (err) {
-        return { error: "Gagal terhubung ke server. Pastikan koneksi internet Anda stabil." };
+    } catch (err: any) {
+        return { error: err.message || "Gagal terhubung ke server. Pastikan koneksi internet Anda stabil." };
     }
 }
 
@@ -73,7 +87,7 @@ export default function Login() {
                             name="email" 
                             type="email" 
                             isRequired
-                            isInvalid={!!actionData?.error && actionData.error.toLowerCase().includes("email")}
+                            isInvalid={!!actionData?.fieldErrors?.email}
                             className="flex flex-col gap-1"
                         >
                             <Label className="text-xs block text-gray-500 dark:text-gray-400">Email</Label>
@@ -81,14 +95,14 @@ export default function Login() {
                                 placeholder="email@example.com"
                                 className={inputClass}
                             />
-                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.error}</FieldError>
+                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.fieldErrors?.email}</FieldError>
                         </TextField>
 
                         <TextField 
                             name="password" 
                             type="password" 
                             isRequired
-                            isInvalid={!!actionData?.error && actionData.error.toLowerCase().includes("password")}
+                            isInvalid={!!actionData?.fieldErrors?.password}
                             className="flex flex-col gap-1"
                         >
                             <Label className="text-xs block text-gray-500 dark:text-gray-400">Password</Label>
@@ -96,12 +110,12 @@ export default function Login() {
                                 placeholder="••••••••"
                                 className={inputClass}
                             />
-                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.error}</FieldError>
+                            <FieldError className="text-[10px] text-red-500 mt-1">{actionData?.fieldErrors?.password}</FieldError>
                         </TextField>  
                         
                         <Button
                             type="submit"
-                            loading={loading}
+                            isPending={loading}
                             className="w-full mt-2"
                         >
                             Login

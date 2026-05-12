@@ -1,27 +1,21 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
+import { apiFetch } from "./apiClient";
+import type { LoginResponse, RegisterResponse, UserResponse, LogoutResponse } from "../types/auth";
 
-export const login = async (email: string, password: string): Promise<any> => {
-  const response = await fetch(`${BASE_URL}/auth/login`, {
+export const login = async (email: string, password: string): Promise<LoginResponse> => {
+  return apiFetch<LoginResponse>("/auth/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
-    credentials: "include",
   });
-  const data = await response.json();
-  return data;
 };
 
-export const logout = async (): Promise<any> => {
+export const logout = async (): Promise<LogoutResponse> => {
   // Clear client-side cookies
   document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
-  const response = await fetch(`${BASE_URL}/auth/logout`, {
+  return apiFetch<LogoutResponse>("/auth/logout", {
     method: "POST",
-    credentials: "include",
   });
-  const data = await response.json();
-  return data;
 };
 
 export const register = async (
@@ -30,22 +24,13 @@ export const register = async (
   email: string,
   password: string,
   phone_number: string
-): Promise<any> => {
-  const response = await fetch(`${BASE_URL}/auth/register`, {
+): Promise<RegisterResponse> => {
+  return apiFetch<RegisterResponse>("/auth/register", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, name, email, password, phone_number }),
-    credentials: "include",
   });
-  const data = await response.json();
-  return data;
 };
 
-export const getCurrentUser = async (): Promise<any> => {
-  const response = await fetch(`${BASE_URL}/users/me`, {
-    method: "GET",
-    credentials: "include",
-  });
-  if (!response.ok) throw new Error("Unauthorized");
-  return response.json();
+export const getCurrentUser = async (): Promise<UserResponse> => {
+  return apiFetch<UserResponse>("/users/me");
 };

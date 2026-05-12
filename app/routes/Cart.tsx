@@ -2,7 +2,9 @@ import { Link, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useTheme } from "../hooks/useTheme";
 import { Surface } from "../components/Surface";
-import { Button } from "../components/Button";
+import { Button } from '@heroui/react';
+import type { CartItemResponse } from "../types/cart";
+
 import {
   getCart,
   getCartItems,
@@ -10,19 +12,7 @@ import {
   removeCartItem,
 } from "../services/cartService";
 
-interface CartItem {
-  id: string;
-  cart_id: string;
-  created_at: string;
-  product_id: number;
-  product_name: string;
-  product_price: number;
-  product_slug: string;
-  product_variant_id: number | null;
-  quantity: number;
-  updated_at: string;
-  variant_name?: string;
-  variant_price_extra?: number;
+interface CartItem extends CartItemResponse {
   category?: string;
   product?: {
     name: string;
@@ -32,8 +22,7 @@ interface CartItem {
 
 export default function Cart() {
   const navigate = useNavigate();
-  const isDark = useTheme();
-  const d = isDark;
+  useTheme();
 
   const [cartId, setCartId] = useState<string | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -50,10 +39,7 @@ export default function Cart() {
 
   const fetchCart = async () => {
     try {
-      const cartData = await getCart();
-    
-
-      const cart = Array.isArray(cartData) ? cartData[0] : cartData?.data?.[0];
+      const cart = await getCart();
 
       if (!cart?.id) {
         setLoading(false);
@@ -62,10 +48,8 @@ export default function Cart() {
 
       setCartId(cart.id);
 
-      const itemsData = await getCartItems(cart.id);
-
-      const items = itemsData?.items ?? itemsData?.data ?? itemsData ?? [];
-      setCartItems(Array.isArray(items) ? items : []);
+      const items = await getCartItems(cart.id);
+      setCartItems(items);
     } catch (err) {
       console.error(err);
     } finally {
@@ -100,11 +84,17 @@ export default function Cart() {
   };
 
   const handleRemove = async (cartId: string, itemId: string) => {
+    const previousItems = [...cartItems];
+    // Optimistic update
+    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+
     try {
-      await removeCartItem(cartId, itemId);
-      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+      const success = await removeCartItem(cartId, itemId);
+      if (!success) throw new Error("Gagal menghapus item");
     } catch (err) {
       console.error(err);
+      // Revert on failure
+      setCartItems(previousItems);
     }
   };
 
