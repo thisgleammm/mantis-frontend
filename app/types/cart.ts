@@ -11,6 +11,7 @@ export interface CartItemResponse {
   product_id: number;
   product_name: string;
   product_price: number;
+  product_image: string;
   product_slug: string;
   product_variant_id: number | null;
   quantity: number;

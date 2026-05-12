@@ -1,9 +1,9 @@
 import { Link, useNavigate, useLocation } from "react-router"
-import { useState, useEffect } from "react"
 import { useTheme } from "../hooks/useTheme"
 import { Button, Dropdown, Label, Header } from "@heroui/react"
 import { Sun, Moon, ShoppingCart, Package, LogOut, User as UserIcon } from "lucide-react"
-import { logout, getCurrentUser } from "../services/authService"
+import { useCurrentUser } from "../hooks/queries"
+import { useLogoutMutation } from "../hooks/mutations"
 
 function getInitials(name: string): string {
   return name.split(" ").map(word => word[0]).slice(0, 2).join("").toUpperCase()
@@ -12,32 +12,23 @@ function getInitials(name: string): string {
 export default function AppNavbar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [userName, setUserName] = useState<string | null>(null)
+  const { data: user } = useCurrentUser()
+  const logoutMutation = useLogoutMutation()
   const { toggleTheme } = useTheme()
 
-  const isLoggedIn = userName !== null
+  const userName = user ? (user.name || user.username) : null
+  const isLoggedIn = typeof window !== "undefined" && localStorage.getItem("is_logged_in") === "true" && userName !== null
 
-  // Auth
-  useEffect(() => {
-    const authStatus = localStorage.getItem("is_logged_in") === "true"
-    if (authStatus && !userName) {
-      getCurrentUser()
-        .then(data => setUserName(data.name || data.username || "User"))
-        .catch(() => { })
-    }
-    if (!authStatus) setUserName(null)
-  }, [location.pathname, userName])
-
-  const handleLogout = async () => {
-    try { await logout() } catch { }
-    finally {
-      localStorage.removeItem("is_logged_in")
-      localStorage.removeItem("token")
-      document.cookie = "is_logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      setUserName(null)
-      navigate("/login")
-    }
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        localStorage.removeItem("is_logged_in")
+        localStorage.removeItem("token")
+        document.cookie = "is_logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+        navigate("/login")
+      },
+    })
   }
 
   const handleCartClick = (e: any) => {

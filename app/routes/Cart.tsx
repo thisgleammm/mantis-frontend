@@ -1,16 +1,10 @@
 import { Link, useNavigate } from "react-router";
-import { useState, useEffect } from "react";
 import { useTheme } from "../hooks/useTheme";
 import { Surface } from "../components/Surface";
 import { Button } from '@heroui/react';
 import type { CartItemResponse } from "../types/cart";
-
-import {
-  getCart,
-  getCartItems,
-  updateCartItem,
-  removeCartItem,
-} from "../services/cartService";
+import { useCart, useCartItems } from "../hooks/queries";
+import { useUpdateCartItemMutation, useRemoveCartItemMutation } from "../hooks/mutations";
 
 interface CartItem extends CartItemResponse {
   category?: string;
@@ -24,78 +18,39 @@ export default function Cart() {
   const navigate = useNavigate();
   useTheme();
 
-  const [cartId, setCartId] = useState<string | null>(null);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const isLoggedIn = typeof window !== "undefined" && localStorage.getItem("is_logged_in") === "true";
+  const { data: cart, isLoading: cartLoading } = useCart();
+  const cartId = cart?.id ?? null;
+  const { data: cartItems = [], isLoading: itemsLoading } = useCartItems(cartId);
+  const updateMutation = useUpdateCartItemMutation();
+  const removeMutation = useRemoveCartItemMutation();
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("is_logged_in") === "true";
-    if (!isLoggedIn) {
-      navigate("/login");
-      return;
-    }
-    fetchCart();
-  }, []);
-
-  const fetchCart = async () => {
-    try {
-      const cart = await getCart();
-
-      if (!cart?.id) {
-        setLoading(false);
-        return;
-      }
-
-      setCartId(cart.id);
-
-      const items = await getCartItems(cart.id);
-      setCartItems(items);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!isLoggedIn) {
+    navigate("/login");
+    return null;
+  }
 
   const handleUpdateQty = async (
-    cartId: string,
     itemId: string,
     delta: number,
     currentQty: number,
   ) => {
     const newQty = Math.max(1, currentQty + delta);
-    // Optimistic update — update UI immediately
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, quantity: newQty } : item,
-      ),
+    if (!cartId) return;
+
+    updateMutation.mutate(
+      { cartId, itemId, quantity: newQty },
+      {
+        onError: () => {
+          // Revert is handled by invalidateQueries on settle
+        },
+      }
     );
-    try {
-      await updateCartItem(cartId, itemId, newQty);
-    } catch (err) {
-      console.error(err);
-      // Revert on failure
-      setCartItems((prev) =>
-        prev.map((item) =>
-          item.id === itemId ? { ...item, quantity: currentQty } : item,
-        ),
-      );
-    }
   };
 
-  const handleRemove = async (cartId: string, itemId: string) => {
-    const previousItems = [...cartItems];
-    // Optimistic update
-    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-
-    try {
-      const success = await removeCartItem(cartId, itemId);
-      if (!success) throw new Error("Gagal menghapus item");
-    } catch (err) {
-      console.error(err);
-      // Revert on failure
-      setCartItems(previousItems);
-    }
+  const handleRemove = (itemId: string) => {
+    if (!cartId) return;
+    removeMutation.mutate({ cartId, itemId });
   };
 
   const subtotal = cartItems.reduce(
@@ -119,7 +74,11 @@ export default function Cart() {
           </p>
         </div>
 
-        {cartItems.length === 0 ? (
+        {cartLoading || itemsLoading ? (
+          <div className="flex items-center justify-center py-32">
+            <div className="w-8 h-8 border-2 rounded-full animate-spin border-purple-500/20 border-t-purple-500" />
+          </div>
+        ) : cartItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 text-center">
             <div className="w-20 h-20 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-4xl mb-6">
               🛒
@@ -141,8 +100,9 @@ export default function Cart() {
             {/* Cart Items */}
             <div className="flex-1 flex flex-col gap-4">
               {cartItems.map((item) => {
-                const harga = Number(item.product_price) || Number(item.product?.price) || 0;
-                const nama = item.product_name || item.product?.name || "Product";
+                const harga = Number(item.product_price) || 0;
+                const nama = item.product_name || "Product";
+                const gambar = item.product_image || "";
                 return (
                 <div
                   key={item.id}
@@ -150,13 +110,21 @@ export default function Cart() {
                 >
                   {/* Image */}
                   <div className="w-20 h-20 rounded-xl border flex items-center justify-center text-3xl flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 border-black/5 dark:from-zinc-900 dark:to-zinc-800 dark:border-white/5">
-                    🛍️
+                    {gambar ? (
+                      <img
+                        src={gambar}
+                        alt={nama}
+                        className="object-cover rounded-xl"
+                      />
+                    ) : (
+                      "🛍️"
+                    )}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1">
                     <span className="text-xs text-purple-400/70 bg-purple-500/10 border border-purple-500/20 px-2 py-1 rounded-full">
-                      {item.category || "General"}
+                      {(item as CartItem).category || "General"}
                     </span>
                     <h3 className="text-sm font-semibold mt-2 transition text-black group-hover:text-purple-700 dark:text-white dark:group-hover:text-purple-100">
                       {nama}
@@ -172,7 +140,7 @@ export default function Cart() {
                   {/* Quantity */}
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handleUpdateQty(cartId as string, item.id, -1, item.quantity)}
+                      onClick={() => handleUpdateQty(item.id, -1, item.quantity)}
                       className="w-8 h-8 rounded-lg border flex items-center justify-center text-lg transition border-black/10 text-black hover:border-purple-500/40 hover:text-purple-600 dark:border-white/10 dark:text-white dark:hover:border-purple-500/40 dark:hover:text-purple-300"
                     >
                       −
@@ -181,7 +149,7 @@ export default function Cart() {
                       {item.quantity}
                     </span>
                     <button
-                      onClick={() => handleUpdateQty(cartId as string, item.id, 1, item.quantity)}
+                      onClick={() => handleUpdateQty(item.id, 1, item.quantity)}
                       className="w-8 h-8 rounded-lg border flex items-center justify-center text-lg transition border-black/10 text-black hover:border-purple-500/40 hover:text-purple-600 dark:border-white/10 dark:text-white dark:hover:border-purple-500/40 dark:hover:text-purple-300"
                     >
                       +
@@ -190,7 +158,7 @@ export default function Cart() {
 
                   {/* Remove */}
                   <button
-                    onClick={() => handleRemove(item.cart_id, item.id)}
+                    onClick={() => handleRemove(item.id)}
                     className="text-gray-500 hover:text-red-400 transition text-lg ml-2"
                   >
                     ✕

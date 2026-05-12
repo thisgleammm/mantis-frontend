@@ -1,14 +1,16 @@
-import { useState, useEffect, type ChangeEvent } from "react"
+import { useState, type ChangeEvent } from "react"
 import { useNavigate, redirect, type LoaderFunctionArgs } from "react-router"
 import { Button } from "@heroui/react"
 import { z } from "zod"
-import { getCart, getCartItems } from "../services/cartService"
-import type { CartItemResponse } from "../types/cart"
+import { useCart, useCartItems } from "../hooks/queries"
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const cookieHeader = request.headers.get("Cookie") || "";
   const cookies = Object.fromEntries(
-    cookieHeader.split(";").map((c) => c.trim().split("="))
+    cookieHeader
+      .split(";")
+      .map((c: string) => c.trim().split("="))
+      .filter((parts: string[]) => parts.length === 2)
   );
   
   const authStatus = cookies.is_logged_in === "true" || !!cookies.token;
@@ -38,36 +40,15 @@ export default function Checkout() {
   })
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
-  const [cartItems, setCartItems] = useState<CartItemResponse[]>([])
-  const [cartLoading, setCartLoading] = useState(true)
+
+  const { data: cart, isLoading: cartLoading } = useCart()
+  const cartId = cart?.id ?? null
+  const { data: cartItems = [] } = useCartItems(cartId)
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
     setFieldErrors((prev) => ({ ...prev, [e.target.name]: "" }))
   }
-
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const cart = await getCart()
-        if (!cart?.id) {
-          navigate("/cart")
-          return
-        }
-        const items = await getCartItems(cart.id)
-        if (items.length === 0) {
-          navigate("/cart")
-          return
-        }
-        setCartItems(items)
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setCartLoading(false)
-      }
-    }
-    fetchCart()
-  }, [])
 
   const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.product_price) || 0) * item.quantity, 0)
   const shipping = 50000
