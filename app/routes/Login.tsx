@@ -7,32 +7,49 @@ import {
 } from "@heroui/react";
 import { login } from "../services/authService";
 import { useTheme } from "../hooks/useTheme";
-import Button from "../components/Button";
+import { Button } from "@heroui/react";
 import Alert from "../components/Alert";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { useState } from "react";
 
+const loginSchema = z.object({
+    email: z.string().min(1, "Email harus diisi").email("Format email tidak valid"),
+    password: z.string().min(1, "Password harus diisi").min(8, "Password minimal 8 karakter"),
+});
+
 export async function clientAction({ request }: { request: Request }) {
     const formData = await request.formData();
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    const result = loginSchema.safeParse(Object.fromEntries(formData));
 
-    if (!email || !password) return { error: "Semua field harus diisi" };
-    if (password.length < 8) return { error: "Password minimal 8 karakter" };
+    if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors;
+        return { 
+            fieldErrors: {
+                email: fieldErrors.email?.[0],
+                password: fieldErrors.password?.[0],
+            }
+        };
+    }
+
+    const { email, password } = result.data;
 
     try {
         const data = await login(email, password);
         if (data.token || data.message === "logged in successfully") {
             localStorage.setItem("is_logged_in", "true");
-            localStorage.setItem("token", data.token);
+            document.cookie = "is_logged_in=true; path=/; max-age=31536000"; // 1 year
+            if (data.token) {
+                localStorage.setItem("token", data.token);
+                document.cookie = `token=${data.token}; path=/; max-age=31536000`;
+            }
             return redirect("/");
         } else if (data.message === "email tidak terdaftar") {
             return redirect(`/register?email=${encodeURIComponent(email)}`);
         } else {
             return { error: data.message || "Email atau password salah." };
         }
-    } catch {
-        return { error: "Gagal terhubung ke server." };
+    } catch (err: any) {
+        return { error: err.message || "Gagal terhubung ke server." };
     }
 }
 
@@ -64,7 +81,7 @@ export default function Login() {
                         )}
 
                         <Form method="post" className="flex flex-col gap-4">
-                            <TextField name="email" type="email" isRequired className="flex flex-col gap-1.5">
+                            <TextField name="email" type="email" isRequired isInvalid={!!actionData?.fieldErrors?.email}  className="flex flex-col gap-1.5">
                                 <Label className="text-sm font-medium text-foreground">Email</Label>
                                 <div className="relative">
                                     <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
@@ -73,7 +90,7 @@ export default function Login() {
                                         className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border border-border bg-field-background text-field-foreground placeholder:text-field-placeholder outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors"
                                     />
                                 </div>
-                                <FieldError className="text-xs text-danger" />
+                                <FieldError className="text-xs text-danger">{actionData?.fieldErrors?.email}</FieldError>
                             </TextField>
 
                             <TextField name="password" type={showPass ? "text" : "password"} isRequired className="flex flex-col gap-1.5">
@@ -94,11 +111,11 @@ export default function Login() {
                                         {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                                     </button>
                                 </div>
-                                <FieldError className="text-xs text-danger" />
+                                <FieldError className="text-xs text-danger">{actionData?.fieldErrors?.password}</FieldError>
                             </TextField>
 
-                            <Button type="submit" loading={loading} className="w-full mt-1">
-                                {loading ? "Masuk..." : "Masuk"}
+                            <Button type="submit" isPending={loading} className="w-full mt-1">
+                                Login
                             </Button>
                         </Form>
 

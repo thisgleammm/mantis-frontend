@@ -1,24 +1,22 @@
-const BASE_URL = "https://mantis-backend.fly.dev/api/v1";
+import { apiFetch } from "./apiClient";
+import type { CartResponse, CartItemResponse } from "../types/cart";
 
-const authHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
-});
-
-export const getCart = async () => {
-  const res = await fetch(`${BASE_URL}/carts`, {
-    headers: authHeaders(), 
-  });
-  const data = await res.json();
-  return data;
+export const getCart = async (): Promise<CartResponse | null> => {
+  const data = await apiFetch<any>("/carts");
+  if (Array.isArray(data)) return data[0] ?? null;
+  if (data?.data) {
+    const arr = Array.isArray(data.data) ? data.data : [data.data];
+    return arr[0] ?? null;
+  }
+  return data ?? null;
 };
 
-export const getCartItems = async (cartId: string) => {
-  const res = await fetch(`${BASE_URL}/carts/${cartId}/items`, {
-    headers: authHeaders(),
-  });
-  const data = await res.json();
-  return data;
+export const getCartItems = async (cartId: string): Promise<CartItemResponse[]> => {
+  const data = await apiFetch<any>(`/carts/${cartId}/items`);
+  if (Array.isArray(data)) return data;
+  if (data?.items) return data.items;
+  if (data?.data) return data.data;
+  return [];
 };
 
 export const addToCart = async (
@@ -26,35 +24,31 @@ export const addToCart = async (
   productId: number,
   variantId?: number | null,
   quantity: number = 1,
-) => {
-  const res = await fetch(`${BASE_URL}/carts/${cartId}/items`, {
+): Promise<CartItemResponse> => {
+  return apiFetch<CartItemResponse>(`/carts/${cartId}/items`, {
     method: "POST",
-    headers: authHeaders(),
     body: JSON.stringify({
       product_id: productId,
       product_variant_id: variantId ?? null,
       quantity,
     }),
   });
-  const data = await res.json();
-  return data;
 };
 
-export const updateCartItem = async (cartId: string, itemId: string, quantity: number) => {
-  const res = await fetch(`${BASE_URL}/carts/items/${itemId}`, {
-    method: "PATCH", 
-    headers: authHeaders(),
+export const updateCartItem = async (cartId: string, itemId: string, quantity: number): Promise<CartItemResponse> => {
+  return apiFetch<CartItemResponse>(`/carts/items/${itemId}`, {
+    method: "PATCH",
     body: JSON.stringify({ quantity }),
   });
-  if (!res.ok) throw new Error(`Update failed: ${res.status}`);
-  const text = await res.text();
-  return text ? JSON.parse(text) : {};
 };
 
 export const removeCartItem = async (cartId: string, itemId: string) => {
-  const res = await fetch(`${BASE_URL}/carts/items/${itemId}`, {
-    method: "DELETE",
-    headers: authHeaders(),
-  });
-  return res.ok;
+  try {
+    await apiFetch(`/carts/items/${itemId}`, {
+      method: "DELETE",
+    });
+    return true;
+  } catch {
+    return false;
+  }
 };
