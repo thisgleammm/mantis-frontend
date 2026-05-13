@@ -6,7 +6,7 @@ import { getAddresses } from "../services/addressService";
 
 export const productKeys = {
   all: ["products"] as const,
-  list: (limit: number, offset: number) => ["products", "list", { limit, offset }] as const,
+  list: (limit: number, offset: number, search: string) => ["products", "list", { limit, offset, search }] as const,
   detail: (id: string | undefined) => ["products", id] as const,
 };
 
@@ -18,10 +18,10 @@ export const authKeys = {
   user: ["user", "me"] as const,
 };
 
-export function useProducts(limit = 20, offset = 0) {
+export function useProducts(limit = 20, offset = 0, search = "") {
   return useQuery({
-    queryKey: productKeys.list(limit, offset),
-    queryFn: () => getAllProducts(limit, offset),
+    queryKey: productKeys.list(limit, offset, search),
+    queryFn: () => getAllProducts(limit, offset, search),
   });
 }
 

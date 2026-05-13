@@ -1,11 +1,10 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useState, useEffect, useRef } from "react";
 import { Star, Search, SearchX } from "lucide-react";
 import { useProducts } from "../hooks/queries";
 import { ProductCardSkeleton } from "../components/Skeleton";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/Card";
 import { Chip } from "../components/Chip";
-import { Kbd } from "../components/Kbd";
 import { useTheme } from "../hooks/ThemeContext";
 import { Pagination } from "@heroui/react";
 
@@ -16,14 +15,28 @@ export default function Products() {
   
   const limit = 12;
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useProducts(limit, (page - 1) * limit);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const { data, isLoading } = useProducts(limit, (page - 1) * limit, search);
   
   const products = data?.products || [];
   const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / limit);
 
-  const [search, setSearch] = useState("");
+
   const [isMac, setIsMac] = useState(false);
+
+  // Sync state to URL if user types in the dedicated products search bar
+  const handleSearchChange = (val: string) => {
+    setSearch(val);
+    setPage(1); // reset pagination
+    if (val) {
+      searchParams.set("q", val);
+    } else {
+      searchParams.delete("q");
+    }
+    setSearchParams(searchParams, { replace: true });
+  };
 
   useEffect(() => {
     setIsMac(navigator.platform.toUpperCase().indexOf("MAC") >= 0);
@@ -38,11 +51,6 @@ export default function Products() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMac]);
 
-  // Note: Client-side filtering only works on current page data.
-  // Real search should be server-side.
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()),
-  );
 
   if (isLoading)
     return (
@@ -61,7 +69,7 @@ export default function Products() {
 
   return (
     <div className="min-h-screen px-6 py-8 font-sans bg-gray-50 text-black dark:bg-black dark:text-white pb-20">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto px-6 py-20">
 
         {/* Header */}
         <div className="mb-7 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -77,14 +85,14 @@ export default function Products() {
               type="text"
               placeholder={`Cari produk... (${isMac ? "⌘" : "Ctrl"}+K)`}
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border outline-none transition-colors bg-white border-black/10 text-black placeholder-gray-400 focus:border-black/25 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder-gray-600 dark:focus:border-white/25"
             />
           </div>
         </div>
 
         {/* Empty state */}
-        {filtered.length === 0 ? (
+        {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 text-center">
             <SearchX size={36} className="text-gray-300 dark:text-gray-700 mb-4" />
             <p className="font-semibold text-black dark:text-white">Tidak ada hasil</p>
@@ -95,7 +103,7 @@ export default function Products() {
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filtered.map((product) => (
+              {products.map((product) => (
                 <Card
                   key={product.id}
                   onClick={() => navigate(`/products/${product.slug}`)}

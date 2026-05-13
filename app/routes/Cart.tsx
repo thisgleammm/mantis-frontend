@@ -67,7 +67,7 @@ export default function Cart() {
   const total = subtotal + shipping;
 
   return (
-    <div className="min-h-screen px-6 py-10 font-sans bg-gray-50 text-black dark:bg-black dark:text-white">
+    <div className="min-h-screen px-6 py-24  font-sans bg-gray-50 text-black dark:bg-black dark:text-white">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">

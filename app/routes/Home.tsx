@@ -4,18 +4,31 @@ import { useTheme } from "../hooks/ThemeContext"
 import { useInView } from "../hooks/useInView"
 import { getAllProducts } from "../services/productService"
 import type { Product } from "../types"
-import { Flame } from "lucide-react"
+import { 
+  Flame, 
+  Shirt, 
+  Laptop, 
+  Headphones, 
+  Footprints, 
+  Watch, 
+  Tablet, 
+  Smartphone, 
+  LayoutGrid,
+  Heart,
+  ShoppingCart,
+  Zap
+} from "lucide-react"
 import { Chip } from "@heroui/react"
 
 const categories = [
-  { name: "T-Shirt", icon: "👕" },
-  { name: "Laptop", icon: "💻" },
-  { name: "Audio", icon: "🎧" },
-  { name: "Shoes", icon: "👟" },
-  { name: "Watch", icon: "⌚" },
-  { name: "Tablet", icon: "📟" },
-  { name: "Smartphone", icon: "📱" },
-  { name: "All", icon: "🛍️" },
+  { name: "T-Shirt", icon: Shirt },
+  { name: "Laptop", icon: Laptop },
+  { name: "Audio", icon: Headphones },
+  { name: "Shoes", icon: Footprints },
+  { name: "Watch", icon: Watch },
+  { name: "Tablet", icon: Tablet },
+  { name: "Smartphone", icon: Smartphone },
+  { name: "All", icon: LayoutGrid },
 ]
 
 function useCountdown(target: Date) {
@@ -78,7 +91,7 @@ export default function Home() {
 
       <section ref={secHero.ref} className={`relative overflow-hidden border-b border-black/8 dark:border-white/8 ${fade(secHero.visible)}`}>
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-purple-500/5 via-transparent to-gray-100 dark:from-white/3 dark:via-transparent dark:to-purple-500/5" />
-        <div className="max-w-6xl mx-auto px-6 py-20 flex flex-col lg:flex-row items-center gap-12">
+        <div className="max-w-6xl mx-auto px-6 py-30 flex flex-col lg:flex-row items-center gap-12">
           <div className="flex-1 z-10">
             <Chip color="accent" variant="soft">
               <Flame color="#ff0000" size={14} />
@@ -116,14 +129,14 @@ export default function Home() {
                 )}
               </div>
               {heroProduct?.discount_price && heroProduct.discount_price < heroProduct.base_price ? (
-                <div className="absolute -top-4 -right-4 text-xs font-black px-4 py-2 rounded-2xl shadow-lg bg-black text-white dark:bg-white dark:text-black">
+                <div className="absolute -top-4 -right-4 border backdrop-blur-xl rounded-2xl px-4 py-2 text-[10px] font-black shadow-xl bg-white/40 border-black/10 text-black dark:bg-white/10 dark:border-white/10 dark:text-white">
                   {Math.round(((heroProduct.base_price - heroProduct.discount_price) / heroProduct.base_price) * 100)}% OFF
                 </div>
               ) : null}
-              <div className="absolute -bottom-4 -left-4 border backdrop-blur rounded-2xl px-4 py-3 text-xs shadow-lg bg-black/5 border-black/10 dark:bg-white/8 dark:border-white/15 dark:backdrop-blur-2xl">
-                <p className="text-[10px] uppercase tracking-widest mb-1 text-gray-500 dark:text-black">Best Seller</p>
+              <div className="absolute -bottom-4 -left-4 border backdrop-blur-xl rounded-2xl px-5 py-4 text-xs shadow-2xl bg-white/40 border-black/10 dark:bg-black/40 dark:border-white/10">
+                <p className="text-[10px] uppercase tracking-widest mb-1 font-medium text-black/50 dark:text-white/50">Best Seller</p>
                 <p className="font-bold text-black dark:text-white">{heroProduct?.name || "Macbook Pro M5"}</p>
-                <p className="text-[11px] text-gray-500 dark:text-gray-100">
+                <p className="text-[11px] font-medium text-purple-600 dark:text-purple-400 mt-0.5">
                   Rp {(heroProduct?.discount_price || heroProduct?.base_price || 35000000).toLocaleString("id-ID")}
                 </p>
               </div>
@@ -144,8 +157,8 @@ export default function Home() {
             {categories.map(cat => (
               <Link to="/products" key={cat.name}>
                 <div className="group flex flex-col items-center gap-2 p-3 rounded-2xl transition cursor-pointer hover:bg-black/5 dark:hover:bg-white/5">
-                  <div className="w-12 h-12 rounded-2xl border flex items-center justify-center text-2xl group-hover:scale-110 transition-all duration-200 bg-black/5 border-black/8 group-hover:border-black/20 dark:bg-white/5 dark:border-white/8 dark:group-hover:border-white/20">
-                    {cat.icon}
+                  <div className="w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 transition-all duration-200 bg-black/5 border-black/8 group-hover:border-black/20 dark:bg-white/5 dark:border-white/8 dark:group-hover:border-white/20">
+                    <cat.icon size={36} className="text-gray-500 group-hover:text-purple-600 transition-colors" />
                   </div>
                   <span className="text-[10px] transition text-center font-medium tracking-wide text-gray-400 group-hover:text-black dark:text-gray-500 dark:group-hover:text-white">{cat.name}</span>
                 </div>
