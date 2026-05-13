@@ -119,7 +119,7 @@ export default function Home() {
                   {Math.round(((heroProduct.base_price - heroProduct.discount_price) / heroProduct.base_price) * 100)}% OFF
                 </div>
               ) : null}
-              <div className="absolute -bottom-4 -left-4 border backdrop-blur rounded-2xl px-4 py-3 text-xs shadow-lg bg-black/5 border-black/10 dark:bg-white/8 dark:border-white/15 dark:backdrop-blur-xl">
+              <div className="absolute -bottom-4 -left-4 border backdrop-blur rounded-2xl px-4 py-3 text-xs shadow-lg bg-black/5 border-black/10 dark:bg-white/8 dark:border-white/15 dark:backdrop-blur-2xl">
                 <p className="text-[10px] uppercase tracking-widest mb-1 text-gray-500 dark:text-black">Best Seller</p>
                 <p className="font-bold text-black dark:text-white">{heroProduct?.name || "Macbook Pro M5"}</p>
                 <p className="text-[11px] text-gray-500 dark:text-gray-100">
