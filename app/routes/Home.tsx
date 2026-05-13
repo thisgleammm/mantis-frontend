@@ -58,9 +58,10 @@ export default function Home() {
   useEffect(() => {
     getAllProducts()
       .then(data => {
-        setFeaturedProducts(data.slice(0, 8))
-        setFlashProducts(data.slice(0, 5))
-        const mac = data.find(p => p.name.toLowerCase().includes("macbook"))
+        const products = data.products
+        setFeaturedProducts(products.slice(0, 8))
+        setFlashProducts(products.slice(0, 5))
+        const mac = products.find((p: Product) => p.name.toLowerCase().includes("macbook"))
         if (mac) setHeroProduct(mac)
       })
       .catch(err => console.error(err))
