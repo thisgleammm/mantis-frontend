@@ -40,3 +40,10 @@ export interface Review {
   created_at?: string;
   name?: string;
 }
+
+export interface PaginatedProducts {
+  products: Product[];
+  total: number;
+  limit: number;
+  offset: number;
+}

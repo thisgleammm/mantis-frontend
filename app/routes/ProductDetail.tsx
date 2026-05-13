@@ -1,7 +1,8 @@
 import { useParams, Link, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
-import { useProduct } from "../hooks/queries";
-import { getCart, getCartItems, addToCart, updateCartItem } from "../services/cartService";
+import { useProduct, useCart } from "../hooks/queries";
+import { useAddToCartMutation } from "../hooks/mutations";
 import { ProductDetailSkeleton } from "../components/Skeleton";
 import { useTheme } from "../hooks/ThemeContext";
 import { Surface } from "../components/Surface";
@@ -12,27 +13,49 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   useTheme();
   const { data: product, isLoading } = useProduct(id);
+  const { data: cart } = useCart();
+  const addToCartMutation = useAddToCartMutation();
 
-  const handleAddToCart = async () => {
-    if (!product) return;
-    try {
-      const cart = await getCart();
-      if (!cart?.id) {
-        navigate("/login");
-        return;
-      }
-      const items = await getCartItems(cart.id);
-      const existingItem = items.find((i) => i.product_id === product.id);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
 
-      if (existingItem) {
-        await updateCartItem(cart.id, existingItem.id, existingItem.quantity + 1);
-      } else {
-        await addToCart(cart.id, product.id, null, 1);
-      }
-      navigate("/cart");
-    } catch (err) {
-      console.error(err);
+  useEffect(() => {
+    if (product?.variants && product.variants.length > 0 && !selectedVariantId) {
+      setSelectedVariantId(product.variants[0].id);
     }
+  }, [product, selectedVariantId]);
+
+  const sortedImages = [...(product?.images || [])].sort((a, b) => a.sort_order - b.sort_order);
+  const currentImage = sortedImages[activeImageIndex]?.image_url || "🛍️";
+
+  const nextImage = () => {
+    setActiveImageIndex((prev) => (prev + 1) % sortedImages.length);
+  };
+
+  const prevImage = () => {
+    setActiveImageIndex((prev) => (prev - 1 + sortedImages.length) % sortedImages.length);
+  };
+
+  const selectedVariant = product?.variants?.find((v) => v.id === selectedVariantId);
+  const priceExtra = selectedVariant?.price_extra || 0;
+  const basePrice = product?.discount_price && product.discount_price > 0 ? product.discount_price : (product?.base_price || 0);
+  const displayPrice = basePrice + priceExtra;
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    if (!cart?.id) {
+      navigate("/login");
+      return;
+    }
+    addToCartMutation.mutate(
+      { 
+        cartId: cart.id, 
+        productId: product.id, 
+        variantId: selectedVariantId ?? undefined,
+        quantity: 1 
+      },
+      { onSuccess: () => navigate("/cart") },
+    );
   };
 
   if (isLoading)
@@ -62,16 +85,52 @@ export default function ProductDetail() {
         </Link>
 
         <div className="flex flex-col lg:flex-row gap-10 mt-4">
-          <div className="flex-1 rounded-2xl flex items-center justify-center text-8xl min-h-72 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-900 dark:to-zinc-800">
-            {product.images && product.images.length > 0 ? (
-              <img 
-                src={product.images[0].image_url} 
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-8xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-900 dark:to-zinc-800">
-                🛍️
+          <div className="flex-1 flex flex-col gap-4">
+            <div className="relative aspect-square rounded-2xl flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-900 dark:to-zinc-800 overflow-hidden group">
+              {sortedImages.length > 0 ? (
+                <>
+                  <img 
+                    src={currentImage} 
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-opacity duration-300"
+                  />
+                  
+                  {sortedImages.length > 1 && (
+                    <>
+                      <button 
+                        onClick={prevImage}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40"
+                      >
+                        ←
+                      </button>
+                      <button 
+                        onClick={nextImage}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40"
+                      >
+                        →
+                      </button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <div className="text-8xl">🛍️</div>
+              )}
+            </div>
+
+            {/* Thumbnails */}
+            {sortedImages.length > 1 && (
+              <div className="flex gap-2 justify-center">
+                {sortedImages.map((img, idx) => (
+                  <button
+                    key={img.id}
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      activeImageIndex === idx ? "border-purple-500" : "border-transparent opacity-50 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={img.image_url} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -86,26 +145,16 @@ export default function ProductDetail() {
               </p>
 
               <div className="mb-6">
-                {product.discount_price &&
-                product.discount_price > 0 &&
-                product.discount_price < product.base_price ? (
-                  <div className="flex items-center gap-3">
-                    <p className="text-3xl font-bold text-black dark:text-white">
-                      Rp {product.discount_price.toLocaleString("id-ID")}
+                <div className="flex items-center gap-3">
+                  <p className="text-3xl font-bold text-purple-500">
+                    Rp {displayPrice.toLocaleString("id-ID")}
+                  </p>
+                  {product.discount_price && product.discount_price < product.base_price && (
+                    <p className="text-lg line-through text-gray-400 dark:text-gray-500">
+                      Rp {(product.base_price + priceExtra).toLocaleString("id-ID")}
                     </p>
-                    {product.base_price > 0 ? (
-                      <p className="text-lg line-through text-gray-400 dark:text-gray-500">
-                        Rp {product.base_price.toLocaleString("id-ID")}
-                      </p>
-                    ) : null}
-                  </div>
-                ) : (
-                  product.base_price > 0 ? (
-                    <p className="text-3xl font-bold text-black dark:text-white">
-                      Rp {product.base_price.toLocaleString("id-ID")}
-                    </p>
-                  ) : null
-                )}
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center gap-2 mb-6">
@@ -124,14 +173,22 @@ export default function ProductDetail() {
                     Pilih Varian:
                   </p>
                   <div className="flex gap-2 flex-wrap">
-                    {product.variants.map((v) => (
-                      <button
-                        key={v.id}
-                        className="px-4 py-2 rounded-xl border text-sm transition border-black/15 text-black hover:bg-black/5 dark:border-white/15 dark:text-white dark:hover:bg-white/10"
-                      >
-                        {v.variant_name}
-                      </button>
-                    ))}
+                    {product.variants.map((v) => {
+                      const isSelected = selectedVariantId === v.id;
+                      return (
+                        <button
+                          key={v.id}
+                          onClick={() => setSelectedVariantId(v.id)}
+                          className={`px-4 py-2 rounded-xl border text-sm transition-all ${
+                            isSelected
+                              ? "border-purple-500 bg-purple-500/10 text-purple-500"
+                              : "border-black/15 text-black hover:bg-black/5 dark:border-white/15 dark:text-white dark:hover:bg-white/10"
+                          }`}
+                        >
+                          {v.variant_name}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               ) : null}
@@ -142,13 +199,14 @@ export default function ProductDetail() {
                 variant="outline"
                 className="flex-1"
                 onPress={handleAddToCart}
+                isLoading={addToCartMutation.isPending}
               >
                 + Tambah ke Cart
               </Button>
               <Button
-                variant="primary"
-                className="flex-1 font-bold"
+                className="flex-1 font-bold bg-purple-500 text-white"
                 onPress={handleAddToCart}
+                isLoading={addToCartMutation.isPending}
               >
                 Beli Sekarang
               </Button>

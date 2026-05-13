@@ -2,9 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllProducts, getProductById } from "../services/productService";
 import { getCart } from "../services/cartService";
 import { getCurrentUser } from "../services/authService";
+import { getAddresses } from "../services/addressService";
 
 export const productKeys = {
   all: ["products"] as const,
+  list: (limit: number, offset: number) => ["products", "list", { limit, offset }] as const,
   detail: (id: string | undefined) => ["products", id] as const,
 };
 
@@ -16,10 +18,10 @@ export const authKeys = {
   user: ["user", "me"] as const,
 };
 
-export function useProducts() {
+export function useProducts(limit = 20, offset = 0) {
   return useQuery({
-    queryKey: productKeys.all,
-    queryFn: getAllProducts,
+    queryKey: productKeys.list(limit, offset),
+    queryFn: () => getAllProducts(limit, offset),
   });
 }
 
@@ -50,5 +52,19 @@ export function useCurrentUser() {
     queryFn: getCurrentUser,
     enabled: isLoggedIn,
     staleTime: 1000 * 60 * 10,
+  });
+}
+
+export const addressKeys = {
+  all: ["addresses"] as const,
+};
+
+export function useAddresses() {
+  const isLoggedIn = typeof window !== "undefined" && localStorage.getItem("is_logged_in") === "true";
+
+  return useQuery({
+    queryKey: addressKeys.all,
+    queryFn: getAddresses,
+    enabled: isLoggedIn,
   });
 }
