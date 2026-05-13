@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAllProducts, getProductById } from "../services/productService";
-import { getCart, getCartItems } from "../services/cartService";
+import { getCart } from "../services/cartService";
 import { getCurrentUser } from "../services/authService";
-import type { Product } from "../types";
-import type { CartItemResponse } from "../types/cart";
 
 export const productKeys = {
   all: ["products"] as const,
@@ -12,7 +10,6 @@ export const productKeys = {
 
 export const cartKeys = {
   all: ["cart"] as const,
-  items: (cartId: string | null) => ["cart", "items", cartId] as const,
 };
 
 export const authKeys = {
@@ -31,6 +28,7 @@ export function useProduct(id: string | undefined) {
     queryKey: productKeys.detail(id),
     queryFn: () => getProductById(id),
     enabled: !!id,
+    staleTime: 0,
   });
 }
 
@@ -41,14 +39,6 @@ export function useCart() {
     queryKey: cartKeys.all,
     queryFn: getCart,
     enabled: isLoggedIn,
-  });
-}
-
-export function useCartItems(cartId: string | null) {
-  return useQuery({
-    queryKey: cartKeys.items(cartId),
-    queryFn: () => getCartItems(cartId!),
-    enabled: !!cartId,
   });
 }
 

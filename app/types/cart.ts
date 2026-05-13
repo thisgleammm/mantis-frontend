@@ -1,6 +1,7 @@
 export interface CartResponse {
   id: string;
   user_id: string;
+  items: CartItemResponse[];
   created_at: string;
   updated_at: string;
 }

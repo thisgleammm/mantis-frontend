@@ -92,7 +92,7 @@ export default function Products() {
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-zinc-900">
                   {product.images && product.images.length > 0 ? (
                     <img
-                      src={[...product.images].sort((a, b) => a.sort_order - b.sort_order)[0].image_url}
+                      src={product.images[0].image_url}
                       alt={product.name}
                       className="h-full w-full object-cover"
                     />

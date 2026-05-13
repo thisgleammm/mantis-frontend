@@ -2,7 +2,8 @@ import { useState, type ChangeEvent } from "react"
 import { useNavigate, redirect, type LoaderFunctionArgs } from "react-router"
 import { Button } from "@heroui/react"
 import { z } from "zod"
-import { useCart, useCartItems } from "../hooks/queries"
+import { useCart } from "../hooks/queries"
+import type { CartItemResponse } from "../types/cart"
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const cookieHeader = request.headers.get("Cookie") || "";
@@ -42,8 +43,7 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false)
 
   const { data: cart, isLoading: cartLoading } = useCart()
-  const cartId = cart?.id ?? null
-  const { data: cartItems = [] } = useCartItems(cartId)
+  const cartItems: CartItemResponse[] = cart?.items ?? []
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })

@@ -6,7 +6,7 @@ import {
 } from "../services/cartService";
 import { logout } from "../services/authService";
 import { cartKeys } from "./queries";
-import type { CartItemResponse } from "../types/cart";
+import type { CartResponse } from "../types/cart";
 
 export function useAddToCartMutation() {
   const queryClient = useQueryClient();
@@ -45,30 +45,22 @@ export function useUpdateCartItemMutation() {
     onMutate: async ({ itemId, quantity }) => {
       await queryClient.cancelQueries({ queryKey: cartKeys.all });
 
-      const queries = queryClient.getQueriesData<CartItemResponse[]>({
-        queryKey: ["cart", "items"],
-      });
+      const previousCart = queryClient.getQueryData<CartResponse>(cartKeys.all);
 
-      const previousQueries = new Map(queries.map(([key, data]) => [JSON.stringify(key), data]));
+      if (previousCart) {
+        queryClient.setQueryData<CartResponse>(cartKeys.all, {
+          ...previousCart,
+          items: previousCart.items.map((item) =>
+            item.id === itemId ? { ...item, quantity } : item
+          ),
+        });
+      }
 
-      queries.forEach(([queryKey, data]) => {
-        if (data) {
-          queryClient.setQueryData(
-            queryKey,
-            data.map((item) =>
-              item.id === itemId ? { ...item, quantity } : item
-            )
-          );
-        }
-      });
-
-      return { previousQueries };
+      return { previousCart };
     },
     onError: (_err, _vars, context) => {
-      if (context?.previousQueries) {
-        context.previousQueries.forEach((data, keyStr) => {
-          queryClient.setQueryData(JSON.parse(keyStr), data);
-        });
+      if (context?.previousCart) {
+        queryClient.setQueryData(cartKeys.all, context.previousCart);
       }
     },
     onSettled: () => {
@@ -94,28 +86,20 @@ export function useRemoveCartItemMutation() {
     onMutate: async ({ itemId }) => {
       await queryClient.cancelQueries({ queryKey: cartKeys.all });
 
-      const queries = queryClient.getQueriesData<CartItemResponse[]>({
-        queryKey: ["cart", "items"],
-      });
+      const previousCart = queryClient.getQueryData<CartResponse>(cartKeys.all);
 
-      const previousQueries = new Map(queries.map(([key, data]) => [JSON.stringify(key), data]));
+      if (previousCart) {
+        queryClient.setQueryData<CartResponse>(cartKeys.all, {
+          ...previousCart,
+          items: previousCart.items.filter((item) => item.id !== itemId),
+        });
+      }
 
-      queries.forEach(([queryKey, data]) => {
-        if (data) {
-          queryClient.setQueryData(
-            queryKey,
-            data.filter((item) => item.id !== itemId)
-          );
-        }
-      });
-
-      return { previousQueries };
+      return { previousCart };
     },
     onError: (_err, _vars, context) => {
-      if (context?.previousQueries) {
-        context.previousQueries.forEach((data, keyStr) => {
-          queryClient.setQueryData(JSON.parse(keyStr), data);
-        });
+      if (context?.previousCart) {
+        queryClient.setQueryData(cartKeys.all, context.previousCart);
       }
     },
     onSettled: () => {

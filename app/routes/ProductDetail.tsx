@@ -65,7 +65,7 @@ export default function ProductDetail() {
           <div className="flex-1 rounded-2xl flex items-center justify-center text-8xl min-h-72 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-900 dark:to-zinc-800">
             {product.images && product.images.length > 0 ? (
               <img 
-                src={product.images.sort((a, b) => a.sort_order - b.sort_order)[0].image_url} 
+                src={product.images[0].image_url} 
                 alt={product.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />

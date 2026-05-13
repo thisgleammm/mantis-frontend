@@ -4,7 +4,7 @@ import { useTheme } from "../hooks/ThemeContext";
 import { Surface } from "../components/Surface";
 import { Button } from '@heroui/react';
 import type { CartItemResponse } from "../types/cart";
-import { useCart, useCartItems } from "../hooks/queries";
+import { useCart } from "../hooks/queries";
 import { useUpdateCartItemMutation, useRemoveCartItemMutation } from "../hooks/mutations";
 
 interface CartItem extends CartItemResponse {
@@ -22,7 +22,7 @@ export default function Cart() {
   const isLoggedIn = typeof window !== "undefined" && localStorage.getItem("is_logged_in") === "true";
   const { data: cart, isLoading: cartLoading } = useCart();
   const cartId = cart?.id ?? null;
-  const { data: cartItems = [], isLoading: itemsLoading } = useCartItems(cartId);
+  const cartItems = cart?.items ?? [];
   const updateMutation = useUpdateCartItemMutation();
   const removeMutation = useRemoveCartItemMutation();
 
@@ -80,7 +80,7 @@ export default function Cart() {
           </p>
         </div>
 
-        {cartLoading || itemsLoading ? (
+        {cartLoading ? (
           <div className="flex items-center justify-center py-32">
             <div className="w-8 h-8 border-2 rounded-full animate-spin border-purple-500/20 border-t-purple-500" />
           </div>
